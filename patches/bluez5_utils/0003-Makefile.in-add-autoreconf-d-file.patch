@@ -1,0 +1,62 @@
+From 97c46d7a00d0e0f6ed4203184673cf8860274af9 Mon Sep 17 00:00:00 2001
+From: Gary Bisson <gary.bisson@boundarydevices.com>
+Date: Fri, 11 Aug 2017 18:20:52 +0200
+Subject: [PATCH] Makefile.in: add autoreconf'd file
+
+Since latest Buildroot doesn't have AUTORECONF for that package.
+
+Signed-off-by: Gary Bisson <gary.bisson@boundarydevices.com>
+---
+ Makefile.in | 9 +++++++--
+ 1 file changed, 7 insertions(+), 2 deletions(-)
+
+diff --git a/Makefile.in b/Makefile.in
+index 6124b2d..b3b42e3 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -1217,14 +1217,15 @@ tools_hci_tester_OBJECTS = $(am_tools_hci_tester_OBJECTS)
+ am__tools_hciattach_SOURCES_DIST = tools/hciattach.c tools/hciattach.h \
+ 	tools/hciattach_st.c tools/hciattach_ti.c \
+ 	tools/hciattach_tialt.c tools/hciattach_ath3k.c \
+-	tools/hciattach_qualcomm.c tools/hciattach_intel.c \
+-	tools/hciattach_bcm43xx.c
++	tools/hciattach_rome.c tools/hciattach_qualcomm.c \
++	tools/hciattach_intel.c tools/hciattach_bcm43xx.c
+ @DEPRECATED_TRUE@@TOOLS_TRUE@am_tools_hciattach_OBJECTS =  \
+ @DEPRECATED_TRUE@@TOOLS_TRUE@	tools/hciattach.$(OBJEXT) \
+ @DEPRECATED_TRUE@@TOOLS_TRUE@	tools/hciattach_st.$(OBJEXT) \
+ @DEPRECATED_TRUE@@TOOLS_TRUE@	tools/hciattach_ti.$(OBJEXT) \
+ @DEPRECATED_TRUE@@TOOLS_TRUE@	tools/hciattach_tialt.$(OBJEXT) \
+ @DEPRECATED_TRUE@@TOOLS_TRUE@	tools/hciattach_ath3k.$(OBJEXT) \
++@DEPRECATED_TRUE@@TOOLS_TRUE@	tools/hciattach_rome.$(OBJEXT) \
+ @DEPRECATED_TRUE@@TOOLS_TRUE@	tools/hciattach_qualcomm.$(OBJEXT) \
+ @DEPRECATED_TRUE@@TOOLS_TRUE@	tools/hciattach_intel.$(OBJEXT) \
+ @DEPRECATED_TRUE@@TOOLS_TRUE@	tools/hciattach_bcm43xx.$(OBJEXT)
+@@ -2626,6 +2627,7 @@ unit_tests = $(am__append_47) unit/test-eir unit/test-uuid \
+ @DEPRECATED_TRUE@@TOOLS_TRUE@						tools/hciattach_ti.c \
+ @DEPRECATED_TRUE@@TOOLS_TRUE@						tools/hciattach_tialt.c \
+ @DEPRECATED_TRUE@@TOOLS_TRUE@						tools/hciattach_ath3k.c \
++@DEPRECATED_TRUE@@TOOLS_TRUE@						tools/hciattach_rome.c \
+ @DEPRECATED_TRUE@@TOOLS_TRUE@						tools/hciattach_qualcomm.c \
+ @DEPRECATED_TRUE@@TOOLS_TRUE@						tools/hciattach_intel.c \
+ @DEPRECATED_TRUE@@TOOLS_TRUE@						tools/hciattach_bcm43xx.c
+@@ -4626,6 +4628,8 @@ tools/hciattach_tialt.$(OBJEXT): tools/$(am__dirstamp) \
+ 	tools/$(DEPDIR)/$(am__dirstamp)
+ tools/hciattach_ath3k.$(OBJEXT): tools/$(am__dirstamp) \
+ 	tools/$(DEPDIR)/$(am__dirstamp)
++tools/hciattach_rome.$(OBJEXT): tools/$(am__dirstamp) \
++	tools/$(DEPDIR)/$(am__dirstamp)
+ tools/hciattach_qualcomm.$(OBJEXT): tools/$(am__dirstamp) \
+ 	tools/$(DEPDIR)/$(am__dirstamp)
+ tools/hciattach_intel.$(OBJEXT): tools/$(am__dirstamp) \
+@@ -5497,6 +5501,7 @@ distclean-compile:
+ @AMDEP_TRUE@@am__include@ @am__quote@tools/$(DEPDIR)/hciattach_bcm43xx.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@tools/$(DEPDIR)/hciattach_intel.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@tools/$(DEPDIR)/hciattach_qualcomm.Po@am__quote@
++@AMDEP_TRUE@@am__include@ @am__quote@tools/$(DEPDIR)/hciattach_rome.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@tools/$(DEPDIR)/hciattach_st.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@tools/$(DEPDIR)/hciattach_ti.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@tools/$(DEPDIR)/hciattach_tialt.Po@am__quote@
+-- 
+2.11.0
+

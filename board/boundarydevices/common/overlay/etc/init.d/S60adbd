@@ -1,0 +1,19 @@
+#! /bin/sh
+
+case "$1" in
+	start|"")
+		modprobe g_ffs idVendor=0x18d1 idProduct=0x4e42 iSerialNumber="buildroot"
+		mkdir -p /dev/usb-ffs/adb
+		mount -t functionfs adb /dev/usb-ffs/adb -o uid=2000,gid=2000
+		adbd &
+		;;
+	stop)
+		killall adbd
+		umount /dev/usb-ffs/adb
+		modprobe -r g_ffs
+		;;
+	*)
+		echo "Usage: adbd {start|stop}" >&2
+		exit 1
+		;;
+esac

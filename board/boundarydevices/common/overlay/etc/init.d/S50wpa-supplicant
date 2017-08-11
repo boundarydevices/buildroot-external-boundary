@@ -1,0 +1,39 @@
+#!/bin/sh
+DAEMON=wpa_supplicant
+CONFIG_FILE=/etc/wpa_supplicant.conf
+PID_FILE=/var/run/wpa_supplicant/pid
+INTERFACE=wlan0
+DRIVER=nl80211
+DAEMON_OPTIONS="-B -c $CONFIG_FILE -P $PID_FILE -i$INTERFACE -D$DRIVER"
+
+case "$1" in
+	start)
+		echo -n "Starting wpa_supplicant: "
+		if ! ifconfig -a $INTERFACE 2&>1 > /dev/null; then
+			echo '[FAIL]'
+			echo "--- Interface '$INTERFACE' not found ---"
+			exit 1
+		fi
+		$DAEMON $DAEMON_OPTIONS && \
+			echo '[ OK ]' || echo '[FAIL]'
+		;;
+	stop)
+		if [ -f $PID_FILE ]; then
+			echo -n "Stopping wpa_supplicant: "
+			read PID < $PID_FILE
+			wpa_cli term;
+			kill $PID && \
+				echo '[ OK ]' || echo '[FAIL]'
+		else
+			echo "pid file not found... is wpa_supplicant running?"
+		fi
+		;;
+	restart)
+		$0 stop
+		$0 start
+		;;
+	*)
+		echo "usage: $0 {start|stop|restart}"
+		;;
+esac
+

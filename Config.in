@@ -1,0 +1,2 @@
+source "$BR2_EXTERNAL_BOUNDARY_PATH/package/bdsdmac_firmware/Config.in"
+source "$BR2_EXTERNAL_BOUNDARY_PATH/package/bdsdmac_module/Config.in"
