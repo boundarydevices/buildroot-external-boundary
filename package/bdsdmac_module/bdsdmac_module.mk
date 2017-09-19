@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-BDSDMAC_MODULE_VERSION = ccc4f3062179eff2a49424fcc3776216da1f48fd
+BDSDMAC_MODULE_VERSION = cb598adce4c1136fbf61c5dc7754fb962d72da87
 BDSDMAC_MODULE_SITE = \
 	$(call github,boundarydevices,qcacld-2.0,$(BDSDMAC_MODULE_VERSION))
 BDSDMAC_MODULE_LICENSE = ISC, BSD-like, GPL-2.0+
