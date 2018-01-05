@@ -1,2 +1,3 @@
-source "$BR2_EXTERNAL_BOUNDARY_PATH/package/bdsdmac_firmware/Config.in"
+source "$BR2_EXTERNAL_BOUNDARY_PATH/package/bdsdmac_bt_firmware/Config.in"
+source "$BR2_EXTERNAL_BOUNDARY_PATH/package/bdsdmac_wlan_firmware/Config.in"
 source "$BR2_EXTERNAL_BOUNDARY_PATH/package/bdsdmac_module/Config.in"
