@@ -2,7 +2,7 @@ comment "bdsdmac_module needs a Linux kernel to be built"
 	depends on !BR2_LINUX_KERNEL
 
 config BR2_PACKAGE_BDSDMAC_MODULE
-	bool "bdsdmac_module"
+	bool "BD-SDMAC Kernel module"
 	depends on BR2_LINUX_KERNEL
 	help
 	  This kernel module adds support for the BD-SDMAC
