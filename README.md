@@ -11,10 +11,10 @@ Here are some details about the configurations available:
 * `nitrogen6x_qt5_gst1_defconfig`:
   * For [BD-SL-i.MX6 (SABRE Lite)][sabrelite], [Nitrogen6X][nitrogen6x], [Nitrogen6X SOM v2][nitrogen6x-somv2], [Nitrogen6 Lite][nitrogen6-lite], [Nitrogen6 MAX][nitrogen6-max], [Nitrogen6 VM][nitrogen6-vm]
   * TiWi-BLE, [BD-SDMAC][bd-sdmac] and Murata WiFi/BT modules support
-  * Qt5.9 modules (+ Cinematic Experience demo)
+  * Qt5.9.3 modules (+ Cinematic Experience demo)
   * GStreamer1.0 with all its plugins
   * NXP proprietary packages (VPU, GPU, SDMA)
-  * NXP-based kernel (4.1.15)
+  * NXP-based kernel (4.9.x_1.0.0_ga)
   * Miscellaneous tools (adbd, CAN, I2C, IIO, etc...)
 * `nitrogen6sx_qt5_gst1_defconfig`:
   * For [Nitrogen6_SoloX][nitrogen6-sx]
@@ -22,24 +22,24 @@ Here are some details about the configurations available:
 * `nitrogen7_gst1_defconfig`:
   * For [Nitrogen7][nitrogen7]
   * Same set of packages as `nitrogen6x_qt5_gst1_defconfig` minus Qt5
-* `nitrogen6x_qt5_gst1_4.9_defconfig`:
+* `nitrogen6x_qt5_gst1_mainline_defconfig`:
   * For [BD-SL-i.MX6 (SABRE Lite)][sabrelite], [Nitrogen6X][nitrogen6x], [Nitrogen6X SOM v2][nitrogen6x-somv2], [Nitrogen6 Lite][nitrogen6-lite], [Nitrogen6 MAX][nitrogen6-max]
   * Same set of packages as `nitrogen6x_qt5_gst1_defconfig`
-  * Mainline LTS kernel (4.9.43)
+  * Mainline LTS kernel (4.14.x+fslc)
 
-**NB**: [BD-SDMAC][bd-sdmac] firmware package is commented out in the defconfig files since it requires [access to our private git server][private-git]. Make sure to un-comment it once the access is granted.
+**NB**: [BD-SDMAC][bd-sdmac] BT firmware package is commented out in the defconfig files since it requires [access to our private git server][private-git]. Make sure to un-comment it once the access is granted.
 
 Build procedure
 ---------------
 
 1. Download the latest Buildroot tree:
 ```
-$ git clone https://git.busybox.net/buildroot -b 2017.08.x
+$ git clone https://git.busybox.net/buildroot -b 2018.02.x
 ```
 
 2. Download Boundary Devices external layer:
 ```
-$ git clone https://github.com/boundarydevices/buildroot-external-boundary -b 2017.08.x
+$ git clone https://github.com/boundarydevices/buildroot-external-boundary -b 2018.02.x
 ```
 
 3. Create an output folder for your build:
