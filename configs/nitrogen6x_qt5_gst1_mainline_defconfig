@@ -37,7 +37,7 @@ BR2_TARGET_UBOOT_CUSTOM_TARBALL_LOCATION="https://github.com/boundarydevices/u-b
 BR2_TARGET_UBOOT_BOARD_DEFCONFIG="nitrogen6q"
 BR2_TARGET_UBOOT_FORMAT_IMX=y
 BR2_TARGET_UBOOT_BOOT_SCRIPT=y
-BR2_TARGET_UBOOT_BOOT_SCRIPT_SOURCE="$(UBOOT_DIR)/board/boundary/bootscripts/bootscript-mainline.txt"
+BR2_TARGET_UBOOT_BOOT_SCRIPT_SOURCE="$(BR2_EXTERNAL_BOUNDARY_PATH)/board/boundarydevices/mainline/bootscript-mainline.txt"
 
 # kernel
 BR2_LINUX_KERNEL=y
