@@ -1,7 +1,0 @@
-config BR2_PACKAGE_BDSDMAC_WLAN_FIRMWARE
-	bool "BD-SDMAC WLAN firmware"
-	help
-	  This module adds wlan firmware files for the BD-SDMAC
-	  QCA9377-based Wi-Fi/BT module.
-
-	  https://boundarydevices.com/product/bd_sdmac_wifi/
