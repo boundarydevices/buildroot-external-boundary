@@ -53,11 +53,8 @@ BR2_PACKAGE_FREESCALE_IMX_PLATFORM_IMX7=y
 BR2_PACKAGE_IMX_CODEC=y
 BR2_PACKAGE_IMX_LIB=y
 
-# Un-comment the line below for BD-SDMAC BT firmware
-# But it requires access to Boundary Devices private git server
-# https://boundarydevices.com/private-git-access/
-#BR2_PACKAGE_BDSDMAC_BT_FIRMWARE=y
-BR2_PACKAGE_BDSDMAC_WLAN_FIRMWARE=y
+# WiFi/BT packages
+BR2_PACKAGE_BDSDMAC_FIRMWARE=y
 BR2_PACKAGE_BDSDMAC_MODULE=y
 BR2_PACKAGE_LINUX_FIRMWARE_TI_WL127X=y
 BR2_PACKAGE_LINUX_FIRMWARE=y
