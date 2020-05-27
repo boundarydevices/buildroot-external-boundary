@@ -27,8 +27,6 @@ Here are some details about the configurations available:
   * Same set of packages as `nitrogen6x_qt5_gst1_defconfig`
   * Mainline LTS kernel (4.9.43)
 
-**NB**: [BD-SDMAC][bd-sdmac] firmware package is commented out in the defconfig files since it requires [access to our private git server][private-git]. Make sure to un-comment it once the access is granted.
-
 Build procedure
 ---------------
 
