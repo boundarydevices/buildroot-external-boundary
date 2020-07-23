@@ -11,10 +11,10 @@ Here are some details about the configurations available:
 * `nitrogen6x_qt5_gst1_defconfig`:
   * For [BD-SL-i.MX6 (SABRE Lite)][sabrelite], [Nitrogen6X][nitrogen6x], [Nitrogen6X SOM v2][nitrogen6x-somv2], [Nitrogen6 Lite][nitrogen6-lite], [Nitrogen6 MAX][nitrogen6-max], [Nitrogen6 VM][nitrogen6-vm]
   * TiWi-BLE, [BD-SDMAC][bd-sdmac] and Murata WiFi/BT modules support
-  * Qt5.9.3 modules (+ Cinematic Experience demo)
+  * Qt5 modules (+ Cinematic Experience demo)
   * GStreamer1.0 with all its plugins
   * NXP proprietary packages (VPU, GPU, SDMA)
-  * NXP-based kernel (4.9.x_1.0.0_ga)
+  * NXP-based kernel (5.4.x_2.1.0_ga)
   * Miscellaneous tools (adbd, CAN, I2C, IIO, etc...)
 * `nitrogen6sx_qt5_gst1_defconfig`:
   * For [Nitrogen6_SoloX][nitrogen6-sx]
@@ -25,19 +25,19 @@ Here are some details about the configurations available:
 * `nitrogen6x_qt5_gst1_mainline_defconfig`:
   * For [BD-SL-i.MX6 (SABRE Lite)][sabrelite], [Nitrogen6X][nitrogen6x], [Nitrogen6X SOM v2][nitrogen6x-somv2], [Nitrogen6 Lite][nitrogen6-lite], [Nitrogen6 MAX][nitrogen6-max]
   * Same set of packages as `nitrogen6x_qt5_gst1_defconfig`
-  * Mainline LTS kernel (4.14.x+fslc)
+  * Mainline kernel
 
 Build procedure
 ---------------
 
 1. Download the latest Buildroot tree:
 ```
-$ git clone https://git.busybox.net/buildroot -b 2018.02.x
+$ git clone https://git.busybox.net/buildroot
 ```
 
 2. Download Boundary Devices external layer:
 ```
-$ git clone https://github.com/boundarydevices/buildroot-external-boundary -b 2018.02.x
+$ git clone https://github.com/boundarydevices/buildroot-external-boundary
 ```
 
 3. Create an output folder for your build:
@@ -143,7 +143,6 @@ If the configuration includes GStreamer support, the following pipelines can be 
 ```
 
 ##### Mainline kernel
-Only VPU is supported in release 4.9 so only the following pipeline will be useful:
 ```
 # wget http://linode.boundarydevices.com/videos/trailer_1080p_h264_mp3.avi -P /root/
 # gst-launch-1.0 filesrc location=/root/trailer_1080p_h264_mp3.avi ! avidemux ! \
