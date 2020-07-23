@@ -1,0 +1,15 @@
+comment "libimxvpuapi-v2 needs an i.MX8 platform with VPU support"
+	depends on BR2_aarch64
+	depends on !BR2_PACKAGE_FREESCALE_IMX_HAS_VPU_HANTRO
+
+config BR2_PACKAGE_LIBIMXVPUAPI_V2
+	bool "libimxvpuapi-v2"
+	depends on BR2_aarch64 # Only relevant for i.MX8
+	depends on BR2_PACKAGE_FREESCALE_IMX_HAS_VPU_HANTRO
+	select BR2_PACKAGE_LIBIMXDMABUFFER
+	select BR2_PACKAGE_IMX_VPU_HANTRO
+	help
+	  This library provides an API for using the for the i.MX8M VPU hardware
+	  video engines.
+
+	  https://github.com/Freescale/libimxvpuapi/tree/v2

@@ -1,4 +1,5 @@
 source "$BR2_EXTERNAL_BOUNDARY_PATH/package/bdsdmac_firmware/Config.in"
 source "$BR2_EXTERNAL_BOUNDARY_PATH/package/bdsdmac_module/Config.in"
 source "$BR2_EXTERNAL_BOUNDARY_PATH/package/libimxdmabuffer/Config.in"
+source "$BR2_EXTERNAL_BOUNDARY_PATH/package/libimxvpuapi-v2/Config.in"
 source "$BR2_EXTERNAL_BOUNDARY_PATH/package/linux-imx-headers/Config.in"
