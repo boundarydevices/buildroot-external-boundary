@@ -1,0 +1,9 @@
+config BR2_PACKAGE_LIBIMXDMABUFFER
+	bool "libimxdmabuffer"
+	depends on BR2_aarch64 # Only relevant for i.MX8M
+	select BR2_PACKAGE_LINUX_IMX_HEADERS
+	help
+	  This library provides an API for allocating memory blocks that
+	  are physically contiguous on i.MX platforms.
+
+	  https://github.com/Freescale/libimxdmabuffer
