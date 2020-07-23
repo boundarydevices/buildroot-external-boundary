@@ -1,0 +1,7 @@
+config BR2_PACKAGE_LINUX_IMX_HEADERS
+	bool "linux-imx-headers"
+	depends on BR2_aarch64 # Only relevant for i.MX8M
+	help
+	  This installs the i.MX headers in staging area. This is the
+	  equivalent to the following Yocto recipe:
+	  https://github.com/Freescale/meta-freescale/blob/dunfell/recipes-kernel/linux/linux-imx-headers_5.4.3.bb
