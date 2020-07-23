@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-BDSDMAC_FIRMWARE_VERSION = ac58684b47af5e97bd9a9f839aa97dcf200acc6f
+BDSDMAC_FIRMWARE_VERSION = 7c849ee87c9b523820e25c3f6a8f3ecbd3b0fbe7
 BDSDMAC_FIRMWARE_SITE = \
        $(call github,boundarydevices,qca-firmware,$(BDSDMAC_FIRMWARE_VERSION))
 BDSDMAC_FIRMWARE_LICENSE = Firmware-QCA
