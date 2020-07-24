@@ -1,0 +1,147 @@
+From 059203aaed563860b1b5e4a48b54c4a4341850ec Mon Sep 17 00:00:00 2001
+From: Haihua Hu <jared.hu@nxp.com>
+Date: Wed, 11 Jul 2018 16:32:41 +0800
+Subject: [PATCH 12/13] MMFMWK-7954 waylandsink: default to play video
+ fullscreen
+
+upstream status: imx specific
+---
+ ext/wayland/wlutils.c  | 16 +++++++++++-----
+ ext/wayland/wlutils.h  |  5 ++++-
+ ext/wayland/wlwindow.c | 29 ++++++++++++++++++++++-------
+ ext/wayland/wlwindow.h |  3 +++
+ 4 files changed, 40 insertions(+), 13 deletions(-)
+
+diff --git a/ext/wayland/wlutils.c b/ext/wayland/wlutils.c
+index b0c1a8d..fb306b8 100644
+--- a/ext/wayland/wlutils.c
++++ b/ext/wayland/wlutils.c
+@@ -37,8 +37,11 @@
+ 
+ #define WESTON_INI "/etc/xdg/weston/weston.ini"
+ 
++/* FIXME: try to get from wayland server */
++#define PANEL_HEIGH 32
++
+ gboolean
+-gst_wl_init_buffer_scale(gint display_width, gint display_height, guint * scale)
++gst_wl_init_surface_state(GstWlDisplay * display, GstWlWindow * window)
+ {
+     gchar path[] = WESTON_INI;
+     gchar line[512], *p, *section = NULL, *size = NULL;
+@@ -124,11 +127,14 @@ gst_wl_init_buffer_scale(gint display_width, gint display_height, guint * scale)
+     }
+ 
+     /* FIXME: only support buffer scale 2 and 1 */
+-    if (display_width > 0 && display_height > 0) {
+-        *scale = display_width / desktop_width;
+-        if (*scale != 1 && *scale != 2) {
+-            *scale = 1;
++    if (display->width > 0 && display->height > 0) {
++        window->scale = display->width / desktop_width;
++        if (window->scale != 1 && window->scale != 2) {
++            ret = FALSE;
++            goto out;
+         }
++        window->fullscreen_width = desktop_width;
++        window->fullscreen_height = desktop_height - PANEL_HEIGH;
+     } else {
+         ret = FALSE;
+         goto out;
+diff --git a/ext/wayland/wlutils.h b/ext/wayland/wlutils.h
+index 285dcae..fb94ad8 100644
+--- a/ext/wayland/wlutils.h
++++ b/ext/wayland/wlutils.h
+@@ -23,9 +23,12 @@
+ 
+ #include <gst/gst.h>
+ 
++#include "wlwindow.h"
++#include "wldisplay.h"
++
+ G_BEGIN_DECLS
+ 
+-gboolean gst_wl_init_buffer_scale(gint display_width, gint display_height, guint * scale);
++gboolean gst_wl_init_surface_state(GstWlDisplay * display, GstWlWindow * window);
+ G_END_DECLS
+ 
+ #endif
+\ No newline at end of file
+diff --git a/ext/wayland/wlwindow.c b/ext/wayland/wlwindow.c
+index b5eb987..959a2a0 100644
+--- a/ext/wayland/wlwindow.c
++++ b/ext/wayland/wlwindow.c
+@@ -156,6 +156,8 @@ gst_wl_window_init (GstWlWindow * self)
+   self->src_width = -1;
+   self->src_height = 0;
+   self->scale = 1;
++  self->fullscreen_width = -1;
++  self->fullscreen_height = -1;
+ }
+ 
+ static void
+@@ -231,8 +233,14 @@ gst_wl_window_new_internal (GstWlDisplay * display, GMutex * render_lock)
+   wl_surface_set_input_region (window->area_surface, NULL);
+   wl_surface_set_input_region (window->video_surface, NULL);
+ 
+-  if (!gst_wl_init_buffer_scale(display->width, display->height, &window->scale)) {
+-    GST_WARNING ("init buffer scale fail, fallback to scale=%d", window->scale);
++  if (!gst_wl_init_surface_state(display, window)) {
++    window->fullscreen_width = display->width;
++    window->fullscreen_height = display->height;
++    window->scale = 1;
++    GST_WARNING ("init surface_state fail, fallback to scale=%d fullscreen (%dx%d)",
++                window->scale,
++                window->fullscreen_width,
++                window->fullscreen_height);
+   }
+ 
+   return window;
+@@ -263,7 +271,7 @@ gst_wl_window_new_toplevel (GstWlDisplay * display, const GstVideoInfo * info,
+     gboolean fullscreen, GMutex * render_lock)
+ {
+   GstWlWindow *window;
+-  gint width;
++  gint width, height;
+ 
+   window = gst_wl_window_new_internal (display, render_lock);
+ 
+@@ -329,10 +337,17 @@ gst_wl_window_new_toplevel (GstWlDisplay * display, const GstVideoInfo * info,
+     goto error;
+   }
+ 
+-  /* set the initial size to be the same as the reported video size */
+-  width =
+-      gst_util_uint64_scale_int_round (info->width, info->par_n, info->par_d);
+-  gst_wl_window_set_render_rectangle (window, 0, 0, width / window->scale, info->height / window->scale);
++  if (window->fullscreen_width <= 0) {
++    /* set the initial size to be the same as the reported video size */
++    width =
++        gst_util_uint64_scale_int_round (info->width, info->par_n, info->par_d);
++    height = info->height;
++  } else {
++    width = window->fullscreen_width;
++    height = window->fullscreen_height;
++  }
++
++  gst_wl_window_set_render_rectangle (window, 0, 0, width, height);
+ 
+   return window;
+ 
+diff --git a/ext/wayland/wlwindow.h b/ext/wayland/wlwindow.h
+index 715f6ed..462b1b3 100644
+--- a/ext/wayland/wlwindow.h
++++ b/ext/wayland/wlwindow.h
+@@ -74,6 +74,9 @@ struct _GstWlWindow
+   /* video buffer scale */
+   guint scale;
+ 
++  /* fullscreen window size */
++  gint fullscreen_width, fullscreen_height;
++
+   /* this will be set when viewporter is available and black background has
+    * already been set on the area_subsurface */
+   gboolean no_border_update;
+-- 
+2.27.0
+

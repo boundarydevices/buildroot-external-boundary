@@ -1,0 +1,195 @@
+From fd4621b5191aa9050cdb3b7cd12c9c364a5079da Mon Sep 17 00:00:00 2001
+From: Haihua Hu <jared.hu@nxp.com>
+Date: Tue, 7 Aug 2018 14:53:38 +0800
+Subject: [PATCH 13/13] MMFMWK-7954 waylandsink: add property to set window
+ resolution
+
+add two property for user to set window resolution when
+using waylandsink in cmdline
+
+upstream status: Pending
+https://bugzilla.gnome.org/show_bug.cgi?id=796932
+
+Conflicts:
+	ext/wayland/gstwaylandsink.c
+---
+ ext/wayland/gstwaylandsink.c | 28 ++++++++++++++++++++++++++++
+ ext/wayland/gstwaylandsink.h |  3 +++
+ ext/wayland/wldisplay.c      |  2 ++
+ ext/wayland/wldisplay.h      |  3 +++
+ ext/wayland/wlutils.c        |  3 ---
+ ext/wayland/wlutils.h        |  3 +++
+ ext/wayland/wlwindow.c       |  7 +++++--
+ 7 files changed, 44 insertions(+), 5 deletions(-)
+
+diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
+index b4907f7..8f4e40d 100644
+--- a/ext/wayland/gstwaylandsink.c
++++ b/ext/wayland/gstwaylandsink.c
+@@ -61,6 +61,8 @@ enum
+ enum
+ {
+   PROP_0,
++  PROP_WINDOW_WIDTH,
++  PROP_WINDOW_HEIGHT,
+   PROP_DISPLAY,
+   PROP_FULLSCREEN
+ };
+@@ -199,6 +201,16 @@ gst_wayland_sink_class_init (GstWaylandSinkClass * klass)
+   gstvideosink_class->show_frame =
+       GST_DEBUG_FUNCPTR (gst_wayland_sink_show_frame);
+ 
++  g_object_class_install_property (gobject_class, PROP_WINDOW_WIDTH,
++      g_param_spec_int ("window-width", "Wayland sink window width", "Wayland "
++          "sink preferred window width in pixel",
++          -1, G_MAXINT, -1, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
++
++  g_object_class_install_property (gobject_class, PROP_WINDOW_HEIGHT,
++      g_param_spec_int ("window-height", "Wayland sink window height", "Wayland "
++          "sink preferred window height in pixel",
++          -1, G_MAXINT, -1, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
++
+   g_object_class_install_property (gobject_class, PROP_DISPLAY,
+       g_param_spec_string ("display", "Wayland Display name", "Wayland "
+           "display name to connect to, if not supplied via the GstContext",
+@@ -213,6 +225,8 @@ gst_wayland_sink_class_init (GstWaylandSinkClass * klass)
+ static void
+ gst_wayland_sink_init (GstWaylandSink * sink)
+ {
++  sink->preferred_width = -1;
++  sink->preferred_height = -1;
+   g_mutex_init (&sink->display_lock);
+   g_mutex_init (&sink->render_lock);
+ }
+@@ -246,6 +260,12 @@ gst_wayland_sink_get_property (GObject * object,
+       g_value_set_boolean (value, sink->fullscreen);
+       GST_OBJECT_UNLOCK (sink);
+       break;
++    case PROP_WINDOW_WIDTH:
++      g_value_set_int (value, sink->preferred_width);
++      break;
++    case PROP_WINDOW_HEIGHT:
++      g_value_set_int (value, sink->preferred_height);
++      break;
+     default:
+       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+       break;
+@@ -269,6 +289,12 @@ gst_wayland_sink_set_property (GObject * object,
+       gst_wayland_sink_set_fullscreen (sink, g_value_get_boolean (value));
+       GST_OBJECT_UNLOCK (sink);
+       break;
++    case PROP_WINDOW_WIDTH:
++      sink->preferred_width = g_value_get_int (value);
++      break;
++    case PROP_WINDOW_HEIGHT:
++      sink->preferred_height = g_value_get_int (value);
++      break;
+     default:
+       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+       break;
+@@ -381,6 +407,8 @@ gst_wayland_sink_change_state (GstElement * element, GstStateChange transition)
+     case GST_STATE_CHANGE_NULL_TO_READY:
+       if (!gst_wayland_sink_find_display (sink))
+         return GST_STATE_CHANGE_FAILURE;
++      sink->display->preferred_width = sink->preferred_width;
++      sink->display->preferred_height = sink->preferred_height;
+       break;
+     default:
+       break;
+diff --git a/ext/wayland/gstwaylandsink.h b/ext/wayland/gstwaylandsink.h
+index be92fe7..2dd6206 100644
+--- a/ext/wayland/gstwaylandsink.h
++++ b/ext/wayland/gstwaylandsink.h
+@@ -62,6 +62,9 @@ struct _GstWaylandSink
+   GstVideoInfo video_info;
+   gboolean fullscreen;
+ 
++  /* preferred window resolution */
++  gint preferred_width, preferred_height;
++
+   gchar *display_name;
+ 
+   gboolean redraw_pending;
+diff --git a/ext/wayland/wldisplay.c b/ext/wayland/wldisplay.c
+index 1c41eb4..6365331 100644
+--- a/ext/wayland/wldisplay.c
++++ b/ext/wayland/wldisplay.c
+@@ -51,6 +51,8 @@ gst_wl_display_init (GstWlDisplay * self)
+   self->buffers = g_hash_table_new (g_direct_hash, g_direct_equal);
+   self->width = -1;
+   self->height = -1;
++  self->preferred_width = -1;
++  self->preferred_height = -1;
+   g_mutex_init (&self->buffers_mutex);
+ }
+ 
+diff --git a/ext/wayland/wldisplay.h b/ext/wayland/wldisplay.h
+index a138a2a..ad99f9a 100644
+--- a/ext/wayland/wldisplay.h
++++ b/ext/wayland/wldisplay.h
+@@ -67,6 +67,9 @@ struct _GstWlDisplay
+   /* real display resolution */
+   gint width, height;
+ 
++  /* preferred window resolution */
++  gint preferred_width, preferred_height;
++
+   /* private */
+   gboolean own_display;
+   GThread *thread;
+diff --git a/ext/wayland/wlutils.c b/ext/wayland/wlutils.c
+index fb306b8..a4d4399 100644
+--- a/ext/wayland/wlutils.c
++++ b/ext/wayland/wlutils.c
+@@ -37,9 +37,6 @@
+ 
+ #define WESTON_INI "/etc/xdg/weston/weston.ini"
+ 
+-/* FIXME: try to get from wayland server */
+-#define PANEL_HEIGH 32
+-
+ gboolean
+ gst_wl_init_surface_state(GstWlDisplay * display, GstWlWindow * window)
+ {
+diff --git a/ext/wayland/wlutils.h b/ext/wayland/wlutils.h
+index fb94ad8..003912c 100644
+--- a/ext/wayland/wlutils.h
++++ b/ext/wayland/wlutils.h
+@@ -28,6 +28,9 @@
+ 
+ G_BEGIN_DECLS
+ 
++/* FIXME: try to get from wayland server */
++#define PANEL_HEIGH 32
++
+ gboolean gst_wl_init_surface_state(GstWlDisplay * display, GstWlWindow * window);
+ G_END_DECLS
+ 
+diff --git a/ext/wayland/wlwindow.c b/ext/wayland/wlwindow.c
+index 959a2a0..c510373 100644
+--- a/ext/wayland/wlwindow.c
++++ b/ext/wayland/wlwindow.c
+@@ -235,7 +235,7 @@ gst_wl_window_new_internal (GstWlDisplay * display, GMutex * render_lock)
+ 
+   if (!gst_wl_init_surface_state(display, window)) {
+     window->fullscreen_width = display->width;
+-    window->fullscreen_height = display->height;
++    window->fullscreen_height = display->height - PANEL_HEIGH;
+     window->scale = 1;
+     GST_WARNING ("init surface_state fail, fallback to scale=%d fullscreen (%dx%d)",
+                 window->scale,
+@@ -337,7 +337,10 @@ gst_wl_window_new_toplevel (GstWlDisplay * display, const GstVideoInfo * info,
+     goto error;
+   }
+ 
+-  if (window->fullscreen_width <= 0) {
++  if (display->preferred_width > 0 && display->preferred_height > 0) {
++    width = display->preferred_width;
++    height = display->preferred_height;
++  } else if (window->fullscreen_width <= 0) {
+     /* set the initial size to be the same as the reported video size */
+     width =
+         gst_util_uint64_scale_int_round (info->width, info->par_n, info->par_d);
+-- 
+2.27.0
+
