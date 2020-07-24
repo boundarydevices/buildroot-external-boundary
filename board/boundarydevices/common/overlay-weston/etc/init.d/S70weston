@@ -1,0 +1,19 @@
+#! /bin/sh
+
+case "$1" in
+	start|"")
+		export XDG_RUNTIME_DIR=/run/user/`id -u ${WESTON_USER}`
+		if ! test -d "$XDG_RUNTIME_DIR"; then
+			mkdir --parents $XDG_RUNTIME_DIR
+			chmod 0700 $XDG_RUNTIME_DIR
+		fi
+		weston --tty=1 &
+		;;
+	stop)
+		killall weston
+		;;
+	*)
+		echo "Usage: $0 {start|stop}" >&2
+		exit 1
+		;;
+esac
