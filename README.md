@@ -150,7 +150,7 @@ If the configuration includes GStreamer support, the following pipelines can be 
 ```
 
 [bd-sdmac]: https://boundarydevices.com/product/bd_sdmac_wifi/ "BD-SDMAC WiFi/BT module"
-[emmc-flashing]:https://boundarydevices.com/programming-emmc-on-i-mx6 "Programming eMMC on i.MX"
+[emmc-flashing]:https://boundarydevices.com/programming-emmc-on-i-mx-platforms "Programming eMMC on i.MX"
 [nitrogen6x]:http://boundarydevices.com/nitrogen6x-board-imx6-arm-cortex-a9-sbc "Nitrogen6X product page"
 [nitrogen6x-som]:http://boundarydevices.com/products/nitrogen6x-som "Nitrogen6X SOM product page"
 [nitrogen6x-somv2]:http://boundarydevices.com/product/nit6x-som-v2/ "Nitrogen6X SOM v2 product page"
