@@ -40,34 +40,32 @@ Here are some details about the configurations available:
 Build procedure
 ---------------
 
-1. Download the latest Buildroot tree:
+This procedure requires you to [have the repo tool installed on your system][repo].
+
+1. Download the latest Buildroot and BD external trees:
 ```
-$ git clone https://git.busybox.net/buildroot
+$ repo init -u https://github.com/boundarydevices/buildroot-manifest -b master
+$ repo sync -c
 ```
 
-2. Download Boundary Devices external layer:
-```
-$ git clone https://github.com/boundarydevices/buildroot-external-boundary
-```
-
-3. Create an output folder for your build:
+2. Create an output folder for your build:
 ```
 $ make BR2_EXTERNAL=$PWD/buildroot-external-boundary/ -C buildroot/ \
-  O=$PWD/output nitrogen6x_qt5_gst1_defconfig
+  O=$PWD/output nitrogen8m_qt5_gst1_defconfig
 $ cd output
 ```
 
-4. Build the image:
+3. Build the image:
 ```
 $ make
 ```
 
-5. Your rootfs image is ready!
+4. Your rootfs image is ready!
 ```
 $ ls -l images/sdcard.img
 ```
 
-6. Create the SDK for this image (optional):
+5. Create the SDK for this image (optional):
 ```
 $ make sdk
 ```
@@ -198,3 +196,4 @@ If the configuration includes GStreamer support, the following pipelines can be 
 [nitrogen8mn-som]:https://boundarydevices.com/wiki/nitrogen8m-nano-som "Nitrogen8M Nano SOM product page"
 [private-git]:https://boundarydevices.com/private-git-access/ "Private Git server access"
 [sabrelite]:http://boundarydevices.com/sabre-lite-imx6-sbc "SABRE Lite product page"
+[repo]:https://source.android.com/setup/develop#installing-repo "Installing repo"
