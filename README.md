@@ -8,14 +8,24 @@ Configurations details
 ----------------------
 
 Here are some details about the configurations available:
-* `nitrogen6x_qt5_gst1_defconfig`:
-  * For [BD-SL-i.MX6 (SABRE Lite)][sabrelite], [Nitrogen6X][nitrogen6x], [Nitrogen6X SOM v2][nitrogen6x-somv2], [Nitrogen6 Lite][nitrogen6-lite], [Nitrogen6 MAX][nitrogen6-max], [Nitrogen6 VM][nitrogen6-vm]
-  * TiWi-BLE, [BD-SDMAC][bd-sdmac] and Murata WiFi/BT modules support
+* `nitrogen8m_qt5_gst1_defconfig`:
+  * For i.MX 8MQ based [Nitrogen8M][nitrogen8m], [Nitrogen8M SOM][nitrogen8m-som]
   * Qt5 modules (+ Cinematic Experience demo)
   * GStreamer1.0 with all its plugins
   * NXP proprietary packages (VPU, GPU, SDMA)
   * NXP-based kernel (5.4.x_2.1.0_ga)
+  * [BD-SDMAC][bd-sdmac] WiFi/BT modules support
   * Miscellaneous tools (adbd, CAN, I2C, IIO, etc...)
+* `nitrogen8mm_qt5_gst1_defconfig`:
+  * For i.MX 8M Mini based [Nitrogen8M Mini][nitrogen8mm], [Nitrogen8M Mini SOM][nitrogen8mm-som]
+  * Same set of packages as `nitrogen8m_qt5_gst1_defconfig`
+* `nitrogen8mn_qt5_gst1_defconfig`:
+  * For i.MX 8M Nano based [Nitrogen8M Nano][nitrogen8mn], [Nitrogen8M Nano SOM][nitrogen8mn-som]
+  * Same set of packages as `nitrogen8m_qt5_gst1_defconfig`
+* `nitrogen6x_qt5_gst1_defconfig`:
+  * For [BD-SL-i.MX6 (SABRE Lite)][sabrelite], [Nitrogen6X][nitrogen6x], [Nitrogen6X SOM v2][nitrogen6x-somv2], [Nitrogen6 Lite][nitrogen6-lite], [Nitrogen6 MAX][nitrogen6-max], [Nitrogen6 VM][nitrogen6-vm]
+  * TiWi-BLE and Murata WiFi/BT modules support
+  * Same set of packages as `nitrogen8m_qt5_gst1_defconfig`
 * `nitrogen6sx_qt5_gst1_defconfig`:
   * For [Nitrogen6_SoloX][nitrogen6-sx]
   * Same set of packages as `nitrogen6x_qt5_gst1_defconfig`
@@ -159,5 +169,11 @@ If the configuration includes GStreamer support, the following pipelines can be 
 [nitrogen6-vm]:http://boundarydevices.com/product/nitrogen6_vm_imx6 "Nitrogen6_VM product page"
 [nitrogen6-sx]:http://boundarydevices.com/product/nit6_solox-imx6 "Nit6_SoloX product page"
 [nitrogen7]:https://boundarydevices.com/product/nitrogen7 "Nitrogen7 product page"
+[nitrogen8m]:https://boundarydevices.com/wiki/nitrogen8m-sbc "Nitrogen8M product page"
+[nitrogen8m-som]:https://boundarydevices.com/wiki/nitrogen8m-som "Nitrogen8M SOM product page"
+[nitrogen8mm]:https://boundarydevices.com/wiki/nitrogen8m-mini-sbc "Nitrogen8M_Mini product page"
+[nitrogen8mm-som]:https://boundarydevices.com/wiki/Nitrogen8M_Mini-SOM "Nitrogen8M_Mini SOM product page"
+[nitrogen8mn]:https://boundarydevices.com/wiki/nitrogen8m-nano-sbc "Nitrogen8M Nano product page"
+[nitrogen8mn-som]:https://boundarydevices.com/wiki/nitrogen8m-nano-som "Nitrogen8M Nano SOM product page"
 [private-git]:https://boundarydevices.com/private-git-access/ "Private Git server access"
 [sabrelite]:http://boundarydevices.com/sabre-lite-imx6-sbc "SABRE Lite product page"
