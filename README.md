@@ -115,6 +115,13 @@ If the configuration/platform supports 3D GPU, make sure to try `kmscube`:
 ### Qt5 demo
 If the configuration includes Qt5 support, the Cinematic demo can be tested.
 
+##### i.MX 8M (Quad, Mini, Nano)
+Then the demo can be started:
+```
+# CinematicExperience-demo -platform wayland
+```
+
+##### i.MX 6/7 (Quad, Dual, Solo)
 The NXP proprietary drivers require to setup the following variables:
 ```
 # export FB_MULTI_BUFFER=3
@@ -128,8 +135,22 @@ Then the demo can be started:
 
 ### Gstreamer demo
 
-##### NXP-based kernel
 If the configuration includes GStreamer support, the following pipelines can be tested:
+
+##### i.MX 8M (Quad, Mini, Nano)
+* VPU testing
+```
+# wget http://linode.boundarydevices.com/videos/trailer_1080p_h264_mp3.avi -P /root/
+# gst-launch-1.0 filesrc location=/root/trailer_1080p_h264_mp3.avi ! \
+  decodebin ! waylandsink
+```
+* Camera (MIPI) Streaming
+```
+# gst-launch-1.0 v4l2src device=/dev/video0 ! video/x-raw,width=1280,height=720 ! \
+  waylandsink
+```
+
+##### i.MX 6/7 (Quad, Dual, Solo) NXP-based kernel
 * VPU testing
 ```
 # wget http://linode.boundarydevices.com/videos/trailer_1080p_h264_mp3.avi -P /root/
@@ -152,10 +173,10 @@ If the configuration includes GStreamer support, the following pipelines can be 
   imxpxpvideosink use-vsync=true
 ```
 
-##### Mainline kernel
+##### i.MX 6/7 (Quad, Dual, Solo) Mainline kernel
 ```
 # wget http://linode.boundarydevices.com/videos/trailer_1080p_h264_mp3.avi -P /root/
-# gst-launch-1.0 filesrc location=/root/trailer_1080p_h264_mp3.avi ! avidemux ! \
+# gst-launch-1.0 filesrc location=/root/trailer_1080p_h264_mp3.avi ! avidemux ! \
   decodebin ! kmssink name=imx-drm sync=0
 ```
 
