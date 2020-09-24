@@ -12,6 +12,11 @@ case "$1" in
 	stop)
 		killall weston
 		;;
+	restart|reload)
+		$0 stop
+		sleep 1
+		$0 start
+		;;
 	*)
 		echo "Usage: $0 {start|stop}" >&2
 		exit 1

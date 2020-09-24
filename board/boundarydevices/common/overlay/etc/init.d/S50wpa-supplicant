@@ -28,8 +28,9 @@ case "$1" in
 			echo "pid file not found... is wpa_supplicant running?"
 		fi
 		;;
-	restart)
+	restart|reload)
 		$0 stop
+		sleep 1
 		$0 start
 		;;
 	*)

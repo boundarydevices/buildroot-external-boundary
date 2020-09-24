@@ -12,6 +12,11 @@ case "$1" in
 		umount /dev/usb-ffs/adb
 		modprobe -r g_ffs
 		;;
+	restart|reload)
+		$0 stop
+		sleep 1
+		$0 start
+		;;
 	*)
 		echo "Usage: adbd {start|stop}" >&2
 		exit 1
