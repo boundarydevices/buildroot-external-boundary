@@ -1,7 +1,7 @@
-From 32485cb29a9fad7ff253902fd5cd0d6df59a2020 Mon Sep 17 00:00:00 2001
+From 878f2c50184dc78f471d38f53d5d9488c0eac73a Mon Sep 17 00:00:00 2001
 From: Haihua Hu <jared.hu@nxp.com>
 Date: Thu, 5 Jul 2018 19:03:48 +0800
-Subject: [PATCH 11/13] MMFMWK-7954 waylandsink: apply surface buffer scale for
+Subject: [PATCH 2/4] MMFMWK-7954 waylandsink: apply surface buffer scale for
  850D
 
 get real display solution using wl_output interface. Compare it
@@ -14,43 +14,33 @@ Conflicts:
 	ext/wayland/wldisplay.c
 	ext/wayland/wlwindow.c
 ---
- ext/wayland/Makefile.am |   6 +-
+ ext/wayland/meson.build |   3 +-
  ext/wayland/wldisplay.c |  52 +++++++++++++++
  ext/wayland/wldisplay.h |   4 ++
  ext/wayland/wlutils.c   | 144 ++++++++++++++++++++++++++++++++++++++++
  ext/wayland/wlutils.h   |  31 +++++++++
- ext/wayland/wlwindow.c  |  18 +++--
+ ext/wayland/wlwindow.c  |  17 +++--
  ext/wayland/wlwindow.h  |   3 +
- 7 files changed, 251 insertions(+), 7 deletions(-)
+ 7 files changed, 248 insertions(+), 6 deletions(-)
  create mode 100644 ext/wayland/wlutils.c
  create mode 100644 ext/wayland/wlutils.h
 
-diff --git a/ext/wayland/Makefile.am b/ext/wayland/Makefile.am
-index 95bb97e..50a38da 100644
---- a/ext/wayland/Makefile.am
-+++ b/ext/wayland/Makefile.am
-@@ -17,7 +17,8 @@ libgstwaylandsink_la_SOURCES =  \
- 	wldisplay.c \
- 	wlwindow.c \
- 	wlvideoformat.c \
--	wllinuxdmabuf.c
-+	wllinuxdmabuf.c	\
-+	wlutils.c
+diff --git a/ext/wayland/meson.build b/ext/wayland/meson.build
+index 75800b2..35b43a7 100644
+--- a/ext/wayland/meson.build
++++ b/ext/wayland/meson.build
+@@ -5,7 +5,8 @@ wl_sources = [
+     'wldisplay.c',
+     'wlwindow.c',
+     'wlvideoformat.c',
+-    'wllinuxdmabuf.c'
++    'wllinuxdmabuf.c',
++    'wlutils.c'
+ ]
  
- nodist_libgstwaylandsink_la_SOURCES = \
- 	viewporter-protocol.c \
-@@ -45,7 +46,8 @@ noinst_HEADERS = \
- 	wldisplay.h \
- 	wlwindow.h \
- 	wlvideoformat.h \
--	wllinuxdmabuf.h
-+	wllinuxdmabuf.h \
-+	wlutils.h
- 
- CLEANFILES = $(BUILT_SOURCES)
- 
+ libdrm_dep = dependency('libdrm', version: '>= 2.4.55', required:get_option('wayland'))
 diff --git a/ext/wayland/wldisplay.c b/ext/wayland/wldisplay.c
-index 9400095..1c41eb4 100644
+index 0bb9dc7..6776097 100644
 --- a/ext/wayland/wldisplay.c
 +++ b/ext/wayland/wldisplay.c
 @@ -49,6 +49,8 @@ gst_wl_display_init (GstWlDisplay * self)
@@ -62,7 +52,7 @@ index 9400095..1c41eb4 100644
    g_mutex_init (&self->buffers_mutex);
  }
  
-@@ -200,6 +202,52 @@ static const struct xdg_wm_base_listener xdg_wm_base_listener = {
+@@ -206,6 +208,52 @@ static const struct xdg_wm_base_listener xdg_wm_base_listener = {
    handle_xdg_wm_base_ping
  };
  
@@ -115,7 +105,7 @@ index 9400095..1c41eb4 100644
  static void
  registry_handle_global (void *data, struct wl_registry *registry,
      uint32_t id, const char *interface, uint32_t version)
-@@ -231,6 +279,10 @@ registry_handle_global (void *data, struct wl_registry *registry,
+@@ -237,6 +285,10 @@ registry_handle_global (void *data, struct wl_registry *registry,
      self->dmabuf =
          wl_registry_bind (registry, id, &zwp_linux_dmabuf_v1_interface, 1);
      zwp_linux_dmabuf_v1_add_listener (self->dmabuf, &dmabuf_listener, self);
@@ -127,7 +117,7 @@ index 9400095..1c41eb4 100644
  }
  
 diff --git a/ext/wayland/wldisplay.h b/ext/wayland/wldisplay.h
-index 4ecc0d6..a138a2a 100644
+index f2025a6..842f238 100644
 --- a/ext/wayland/wldisplay.h
 +++ b/ext/wayland/wldisplay.h
 @@ -58,11 +58,15 @@ struct _GstWlDisplay
@@ -336,7 +326,7 @@ index 0000000..285dcae
 +#endif
 \ No newline at end of file
 diff --git a/ext/wayland/wlwindow.c b/ext/wayland/wlwindow.c
-index a3c3337..b5eb987 100644
+index bdd4b57..ed58735 100644
 --- a/ext/wayland/wlwindow.c
 +++ b/ext/wayland/wlwindow.c
 @@ -27,6 +27,7 @@
@@ -355,9 +345,9 @@ index a3c3337..b5eb987 100644
  }
  
  static void
-@@ -229,6 +231,10 @@ gst_wl_window_new_internal (GstWlDisplay * display, GMutex * render_lock)
-   wl_surface_set_input_region (window->area_surface, NULL);
-   wl_surface_set_input_region (window->video_surface, NULL);
+@@ -235,6 +237,10 @@ gst_wl_window_new_internal (GstWlDisplay * display, GMutex * render_lock)
+   wl_surface_set_input_region (window->video_surface, region);
+   wl_region_destroy (region);
  
 +  if (!gst_wl_init_buffer_scale(display->width, display->height, &window->scale)) {
 +    GST_WARNING ("init buffer scale fail, fallback to scale=%d", window->scale);
@@ -366,16 +356,16 @@ index a3c3337..b5eb987 100644
    return window;
  }
  
-@@ -326,7 +332,7 @@ gst_wl_window_new_toplevel (GstWlDisplay * display, const GstVideoInfo * info,
-   /* set the initial size to be the same as the reported video size */
-   width =
-       gst_util_uint64_scale_int_round (info->width, info->par_n, info->par_d);
--  gst_wl_window_set_render_rectangle (window, 0, 0, width, info->height);
-+  gst_wl_window_set_render_rectangle (window, 0, 0, width / window->scale, info->height / window->scale);
+@@ -334,7 +340,7 @@ gst_wl_window_new_toplevel (GstWlDisplay * display, const GstVideoInfo * info,
+     /* set the initial size to be the same as the reported video size */
+     gint width =
+         gst_util_uint64_scale_int_round (info->width, info->par_n, info->par_d);
+-    gst_wl_window_set_render_rectangle (window, 0, 0, width, info->height);
++    gst_wl_window_set_render_rectangle (window, 0, 0, width / window->scale, info->height / window->scale);
+   }
  
    return window;
- 
-@@ -387,10 +393,10 @@ gst_wl_window_resize_video_surface (GstWlWindow * window, gboolean commit)
+@@ -396,10 +402,10 @@ gst_wl_window_resize_video_surface (GstWlWindow * window, gboolean commit)
    GstVideoRectangle dst = { 0, };
    GstVideoRectangle res;
  
@@ -390,15 +380,14 @@ index a3c3337..b5eb987 100644
  
    /* center the video_subsurface inside area_subsurface */
    src.w = window->video_width;
-@@ -470,6 +476,8 @@ gst_wl_window_render (GstWlWindow * window, GstWlBuffer * buffer,
-   else
-     wl_surface_attach (window->video_surface_wrapper, NULL, 0, 0);
- 
-+  wl_surface_set_buffer_scale(window->video_surface_wrapper, window->scale);
-+  
-   wl_surface_damage (window->video_surface_wrapper, 0, 0,
-       window->video_rectangle.w, window->video_rectangle.h);
-   wl_surface_commit (window->video_surface_wrapper);
+@@ -490,6 +496,7 @@ gst_wl_window_render (GstWlWindow * window, GstWlBuffer * buffer,
+   if (G_UNLIKELY (info)) {
+     /* commit also the parent (area_surface) in order to change
+      * the position of the video_subsurface */
++    wl_surface_set_buffer_scale(window->video_surface_wrapper, window->scale);
+     wl_surface_damage (window->area_surface_wrapper, 0, 0,
+         window->render_rectangle.w, window->render_rectangle.h);
+     wl_surface_commit (window->area_surface_wrapper);
 diff --git a/ext/wayland/wlwindow.h b/ext/wayland/wlwindow.h
 index fc35af2..715f6ed 100644
 --- a/ext/wayland/wlwindow.h
@@ -414,5 +403,5 @@ index fc35af2..715f6ed 100644
     * already been set on the area_subsurface */
    gboolean no_border_update;
 -- 
-2.27.0
+2.29.2
 
