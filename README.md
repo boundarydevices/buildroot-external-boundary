@@ -13,7 +13,7 @@ Here are some details about the configurations available:
   * Qt5 modules (+ Cinematic Experience demo)
   * GStreamer1.0 with all its plugins
   * NXP proprietary packages (VPU, GPU, SDMA)
-  * NXP-based kernel (5.4.x_2.1.0_ga)
+  * NXP-based kernel (5.4.x_2.3.0_ga)
   * [BD-SDMAC][bd-sdmac] WiFi/BT modules support
   * Miscellaneous tools (adbd, CAN, I2C, IIO, etc...)
 * `nitrogen8mm_qt5_gst1_defconfig`:
@@ -21,6 +21,9 @@ Here are some details about the configurations available:
   * Same set of packages as `nitrogen8m_qt5_gst1_defconfig`
 * `nitrogen8mn_qt5_gst1_defconfig`:
   * For i.MX 8M Nano based [Nitrogen8M Nano][nitrogen8mn], [Nitrogen8M Nano SOM][nitrogen8mn-som]
+  * Same set of packages as `nitrogen8m_qt5_gst1_defconfig`
+* `nitrogen8mp_qt5_gst1_defconfig`:
+  * For i.MX 8M Plus based [Nitrogen8M Plus SOM][nitrogen8mp-som]
   * Same set of packages as `nitrogen8m_qt5_gst1_defconfig`
 * `nitrogen6x_qt5_gst1_defconfig`:
   * For [BD-SL-i.MX6 (SABRE Lite)][sabrelite], [Nitrogen6X][nitrogen6x], [Nitrogen6X SOM v2][nitrogen6x-somv2], [Nitrogen6 Lite][nitrogen6-lite], [Nitrogen6 MAX][nitrogen6-max], [Nitrogen6 VM][nitrogen6-vm]
@@ -194,6 +197,7 @@ If the configuration includes GStreamer support, the following pipelines can be 
 [nitrogen8mm-som]:https://boundarydevices.com/wiki/Nitrogen8M_Mini-SOM "Nitrogen8M_Mini SOM product page"
 [nitrogen8mn]:https://boundarydevices.com/wiki/nitrogen8m-nano-sbc "Nitrogen8M Nano product page"
 [nitrogen8mn-som]:https://boundarydevices.com/wiki/nitrogen8m-nano-som "Nitrogen8M Nano SOM product page"
+[nitrogen8mp-som]:https://boundarydevices.com/wiki/nitrogen8m-plus-som "Nitrogen8M Plus SOM product page"
 [private-git]:https://boundarydevices.com/private-git-access/ "Private Git server access"
 [sabrelite]:http://boundarydevices.com/sabre-lite-imx6-sbc "SABRE Lite product page"
 [repo]:https://source.android.com/setup/develop#installing-repo "Installing repo"
