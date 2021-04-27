@@ -16,10 +16,10 @@ LIBIMXVPUAPI_V2_NEEDS_EXTERNAL_WAF = YES
 LIBIMXVPUAPI_V2_CONF_OPTS += --imx-headers="$(LINUX_DIR)/include/uapi"
 LIBIMXVPUAPI_V2_CONF_OPTS += --sysroot-path=$(STAGING_DIR)
 LIBIMXVPUAPI_V2_CONF_OPTS += --libdir=/usr/lib
-ifeq ($(BR2_PACKAGE_FREESCALE_IMX_PLATFORM_IMX8M),y)
-LIBIMXVPUAPI_V2_CONF_OPTS += --imx-platform="imx8m"
-else
+ifeq ($(BR2_PACKAGE_FREESCALE_IMX_PLATFORM_IMX8MM),y)
 LIBIMXVPUAPI_V2_CONF_OPTS += --imx-platform="imx8mm"
+else
+LIBIMXVPUAPI_V2_CONF_OPTS += --imx-platform="imx8m"
 endif
 
 $(eval $(waf-package))
