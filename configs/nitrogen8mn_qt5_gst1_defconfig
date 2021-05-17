@@ -3,6 +3,7 @@ BR2_aarch64=y
 BR2_cortex_a53=y
 
 # System
+BR2_SSP_NONE=y
 BR2_TARGET_GENERIC_GETTY=y
 BR2_TARGET_GENERIC_GETTY_PORT="ttymxc1"
 BR2_ROOTFS_POST_BUILD_SCRIPT="board/freescale/common/imx/imx8-bootloader-prepare.sh board/boundarydevices/common/post-build.sh"
