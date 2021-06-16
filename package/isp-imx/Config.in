@@ -1,0 +1,13 @@
+comment "i.MX Verisilicon Software ISP"
+	depends on BR2_aarch64
+
+config BR2_PACKAGE_ISP_IMX
+	bool "isp-imx"
+	depends on BR2_aarch64 # Only relevant for i.MX8
+	depends on BR2_TOOLCHAIN_USES_GLIBC
+	depends on BR2_PACKAGE_IMX_GPU_G2D
+	select BR2_PACKAGE_LIBDRM
+	select BR2_PACKAGE_LINUX_IMX_HEADERS
+	select BR2_PACKAGE_PYTHON3
+	help
+	  i.MX Verisilicon Software ISP.
