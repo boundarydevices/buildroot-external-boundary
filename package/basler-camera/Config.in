@@ -1,0 +1,8 @@
+comment "basler camera needs a Linux kernel to be built"
+	depends on !BR2_LINUX_KERNEL
+
+config BR2_PACKAGE_BASLER_CAMERA
+	bool "Basler Camera Driver"
+	depends on BR2_LINUX_KERNEL
+	help
+	  Basler camera binary drivers.
