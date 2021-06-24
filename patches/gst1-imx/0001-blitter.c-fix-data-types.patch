@@ -1,0 +1,47 @@
+From 84fc36fa4559530e017fa7ef41daf0a9e7573840 Mon Sep 17 00:00:00 2001
+From: Chris Dimich <Chris.Dimich@boundarydevices.com>
+Date: Tue, 15 Jun 2021 16:29:56 -0700
+Subject: [PATCH 1/1] blitter.c: fix data types
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Fixes issue error: unknown type name ‘u32’and error: unknown type name
+‘u8’.
+
+Signed-off-by: Chris Dimich <Chris.Dimich@boundarydevices.com>
+---
+ src/ipu/blitter.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/src/ipu/blitter.c b/src/ipu/blitter.c
+index 5446f57..300b58c 100644
+--- a/src/ipu/blitter.c
++++ b/src/ipu/blitter.c
+@@ -65,7 +65,7 @@ static gboolean gst_imx_ipu_blitter_blit(GstImxBlitter *blitter, guint8 alpha);
+ 
+ static void gst_imx_ipu_blitter_set_task_params(GstImxIpuBlitter *ipu_blitter, GstBuffer *video_frame, struct ipu_task *task, GstVideoInfo const *info, gboolean is_input);
+ static gboolean gst_imx_ipu_blitter_allocate_internal_fill_frame(GstImxIpuBlitter *ipu_blitter);
+-static void gst_imx_ipu_blitter_print_ipu_fourcc(u32 format, char buf[5]);
++static void gst_imx_ipu_blitter_print_ipu_fourcc(__u32 format, char buf[5]);
+ static guint32 gst_imx_ipu_blitter_get_v4l_format(GstVideoFormat format);
+ static int gst_imx_ipu_video_bpp(GstVideoFormat fmt);
+ static void gst_imx_ipu_blitter_set_output_rotation(GstImxIpuBlitter *ipu_blitter, GstImxCanvasInnerRotation rotation);
+@@ -564,12 +564,12 @@ static gboolean gst_imx_ipu_blitter_allocate_internal_fill_frame(GstImxIpuBlitte
+ }
+ 
+ 
+-static void gst_imx_ipu_blitter_print_ipu_fourcc(u32 format, char buf[5])
++static void gst_imx_ipu_blitter_print_ipu_fourcc(__u32 format, char buf[5])
+ {
+ 	int i;
+ 	for (i = 0; i < 4; ++i)
+ 	{
+-		u8 b = format >> (i * 8) & 0xff;
++		__u8 b = format >> (i * 8) & 0xff;
+ 		buf[i] = (b < 32) ? '.' : ((char)b);
+ 	}
+ 	buf[4] = 0;
+-- 
+2.31.1
+

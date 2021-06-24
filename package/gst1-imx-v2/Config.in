@@ -14,3 +14,9 @@ config BR2_PACKAGE_GST1_IMX_V2
 	  platforms, which make use of their multimedia capabilities.
 
 	  https://github.com/Freescale/gstreamer-imx/tree/v2
+
+config BR2_PACKAGE_GST1_IMX_V2_G2D
+	bool "imxg2d"
+	depends on BR2_PACKAGE_IMX_GPU_G2D
+	help
+	  Elements leveraging the 2D GPU
