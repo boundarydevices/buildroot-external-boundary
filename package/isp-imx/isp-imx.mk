@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-ISP_IMX_VERSION = 4.2.2.11.0
+ISP_IMX_VERSION = 4.2.2.6.0
 ISP_IMX_SITE = $(FREESCALE_IMX_SITE)
 ISP_IMX_SOURCE = isp-imx-$(ISP_IMX_VERSION).bin
 ISP_IMX_DEPENDENCIES = linux linux-imx-headers python3 libdrm imx-gpu-g2d
@@ -27,8 +27,6 @@ ISP_IMX_CONF_OPTS += \
     -DENABLE_IRQ=1 \
     -DPARTITION_BUILD=0 \
     -D3A_SRC_BUILD=0 \
-    -DIMX_G2D=ON \
-    -DBUILD_SHARED_LIBS=ON \
     -Wno-dev
 
 ISP_IMX_CONF_ENV += SDKTARGETSYSROOT=$(STAGING_DIR)
@@ -43,7 +41,7 @@ define ISP_IMX_INSTALL_TARGET_CMDS
 	cp -r $(@D)/$(ISP_IMX_SUBDIR)/generated/release/bin/isp_media_server $(TARGET_DIR)/opt/imx8-isp/bin
 	cp -r $(@D)/$(ISP_IMX_SUBDIR)/generated/release/bin/*_test $(TARGET_DIR)/opt/imx8-isp/bin
 	cp -r $(@D)/$(ISP_IMX_SUBDIR)/generated/release/bin/vvext $(TARGET_DIR)/opt/imx8-isp/bin
-	cp -r $(@D)/dewarp/dewarp_config/ $(TARGET_DIR)/opt/imx8-isp/bin
+	cp -r $(@D)/mediacontrol/case/ $(TARGET_DIR)/opt/imx8-isp/bin
 	cp -r $(@D)/$(ISP_IMX_SUBDIR)/generated/release/lib/*.so* $(TARGET_DIR)/usr/lib/
 
 	cp $(@D)/imx/run.sh $(TARGET_DIR)/opt/imx8-isp/bin
