@@ -1,0 +1,18 @@
+#! /bin/sh
+
+case "$1" in
+	start|"")
+		/bin/sh /opt/imx8-isp/bin/start_isp.sh &
+		;;
+	stop)
+		;;
+	restart|reload)
+		$0 stop
+		sleep 1
+		$0 start
+		;;
+	*)
+		echo "Usage: $0 {start|stop}" >&2
+		exit 1
+		;;
+esac

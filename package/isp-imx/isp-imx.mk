@@ -44,7 +44,6 @@ define ISP_IMX_INSTALL_TARGET_CMDS
 	cp -r $(@D)/$(ISP_IMX_SUBDIR)/generated/release/bin/*_test $(TARGET_DIR)/opt/imx8-isp/bin
 	cp -r $(@D)/$(ISP_IMX_SUBDIR)/generated/release/bin/vvext $(TARGET_DIR)/opt/imx8-isp/bin
 	cp -r $(@D)/dewarp/dewarp_config/ $(TARGET_DIR)/opt/imx8-isp/bin
-	cp -r $(@D)/$(ISP_IMX_SUBDIR)/generated/release/include/* $(TARGET_DIR)/usr/include/
 	cp -r $(@D)/$(ISP_IMX_SUBDIR)/generated/release/lib/*.so* $(TARGET_DIR)/usr/lib/
 
 	cp $(@D)/imx/run.sh $(TARGET_DIR)/opt/imx8-isp/bin
@@ -55,8 +54,13 @@ define ISP_IMX_INSTALL_TARGET_CMDS
 endef
 
 define ISP_IMX_INSTALL_INIT_SYSTEMD
-	$(INSTALL) -D -m 644 package/imx/imx8-isp.service \
+	$(INSTALL) -D -m 644 $(@D)/imx/imx8-isp.service \
 		$(TARGET_DIR)/usr/lib/systemd/system/imx8-isp.service
+endef
+
+define ISP_IMX_INSTALL_INIT_SYSV
+	$(INSTALL) -D -m 755 $(BR2_EXTERNAL_BOUNDARY_PATH)/package/isp-imx/S80isp \
+		$(TARGET_DIR)/etc/init.d/S80isp
 endef
 
 $(eval $(cmake-package))
