@@ -20,6 +20,8 @@ endef
 define BASLER_CAMERA_INSTALL_TARGET_CMDS
 	mkdir -p $(TARGET_DIR)/opt/imx8-isp/bin
 	cp -r $(@D)/opt/imx8-isp/bin/* $(TARGET_DIR)/opt/imx8-isp/bin
+	ln -sf /opt/imx8-isp/bin/DAA3840_30MC_1080P.drv $(TARGET_DIR)/usr/lib64/DAA3840_30MC_1080P.drv
+	ln -sf /opt/imx8-isp/bin/DAA3840_30MC_4K.drv $(TARGET_DIR)/usr/lib64/DAA3840_30MC_4K.drv
 	cp -r $(@D)/usr/lib/* $(TARGET_DIR)/usr/lib/
 endef
 
