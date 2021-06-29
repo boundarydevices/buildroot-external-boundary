@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-BASLER_CAMERA_VERSION = 4.2.2.11.0
+BASLER_CAMERA_VERSION = 4.2.2.6.0
 BASLER_CAMERA_SITE = $(FREESCALE_IMX_SITE)
 BASLER_CAMERA_SOURCE = basler-camera-$(BASLER_CAMERA_VERSION).bin
 BASLER_CAMERA_DEPENDENCIES = linux
