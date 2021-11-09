@@ -1,9 +1,26 @@
 comment "qcacld-module needs a Linux kernel to be built"
 	depends on !BR2_LINUX_KERNEL
 
-config BR2_PACKAGE_QCACLD_MODULE
+menuconfig BR2_PACKAGE_QCACLD_MODULE
 	bool "qcacld-2.0 kernel module"
 	depends on BR2_LINUX_KERNEL
 	help
 	  This kernel module adds support for the Qualcomm-based
 	  Wi-Fi modules using qcacld-2.0 such as the BD-SDMAC.
+
+if BR2_PACKAGE_QCACLD_MODULE
+choice
+	prompt "Module interface"
+
+config BR2_PACKAGE_QCACLD_MODULE_IF_SDIO
+	bool "sdio"
+
+config BR2_PACKAGE_QCACLD_MODULE_IF_PCI
+	bool "pci"
+endchoice
+
+config BR2_PACKAGE_QCACLD_MODULE_IF
+	string
+	default "sdio" if BR2_PACKAGE_QCACLD_MODULE_IF_SDIO
+	default "pci" if BR2_PACKAGE_QCACLD_MODULE_IF_PCI
+endif
