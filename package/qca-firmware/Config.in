@@ -1,5 +1,17 @@
-config BR2_PACKAGE_QCA_FIRMWARE
+menuconfig BR2_PACKAGE_QCA_FIRMWARE
 	bool "qca-firmware"
 	help
 	  This modules adds firmware files for the Qualcomm-based
 	  Wi-Fi/BT modules such as the BD-SDMAC.
+
+if BR2_PACKAGE_QCA_FIRMWARE
+choice
+	prompt "WiFi/BT module"
+
+config BR2_PACKAGE_QCA_FIRMWARE_QCA9377_BDSDMAC
+	bool "qca9377-sdio (BD-SDMAC)"
+
+config BR2_PACKAGE_QCA_FIRMWARE_QCA6174_PCIE
+	bool "qca6174-pci"
+endchoice
+endif
