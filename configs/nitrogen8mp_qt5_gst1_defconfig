@@ -63,7 +63,7 @@ BR2_LINUX_KERNEL_CUSTOM_TARBALL_LOCATION="https://github.com/boundarydevices/lin
 BR2_LINUX_KERNEL_DEFCONFIG="boundary"
 BR2_LINUX_KERNEL_DTS_SUPPORT=y
 BR2_LINUX_KERNEL_INSTALL_TARGET=y
-BR2_LINUX_KERNEL_INTREE_DTS_NAME="freescale/imx8mp-nitrogen8mp freescale/imx8mp-a0-nitrogen8mp"
+BR2_LINUX_KERNEL_INTREE_DTS_NAME="freescale/imx8mp-nitrogen8mp freescale/imx8mp-nitrogen8mp-m4 freescale/imx8mp-nitrogen8mp-enc freescale/imx8mp-nitrogen8mp-enc-tc358743"
 BR2_LINUX_KERNEL_NEEDS_HOST_OPENSSL=y
 
 # NXP packages
@@ -163,7 +163,7 @@ BR2_PACKAGE_WESTON_RDP=y
 BR2_PACKAGE_WESTON_DEMO_CLIENTS=y
 
 #ISP
-BR2_PACKAGE_ISP_VVCAM_MODULE=y
+BR2_PACKAGE_KERNEL_MODULE_ISP_VVCAM=y
 BR2_PACKAGE_ISP_IMX=y
 BR2_PACKAGE_BASLER_CAMERA=y
 
