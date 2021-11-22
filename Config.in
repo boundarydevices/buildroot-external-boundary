@@ -1,7 +1,7 @@
 source "$BR2_EXTERNAL_BOUNDARY_PATH/package/basler-camera/Config.in"
 source "$BR2_EXTERNAL_BOUNDARY_PATH/package/gst1-imx-v2/Config.in"
 source "$BR2_EXTERNAL_BOUNDARY_PATH/package/isp-imx/Config.in"
-source "$BR2_EXTERNAL_BOUNDARY_PATH/package/isp-vvcam-module/Config.in"
+source "$BR2_EXTERNAL_BOUNDARY_PATH/package/kernel-module-isp-vvcam/Config.in"
 source "$BR2_EXTERNAL_BOUNDARY_PATH/package/libimxdmabuffer/Config.in"
 source "$BR2_EXTERNAL_BOUNDARY_PATH/package/libimxvpuapi-v2/Config.in"
 source "$BR2_EXTERNAL_BOUNDARY_PATH/package/linux-imx-headers/Config.in"

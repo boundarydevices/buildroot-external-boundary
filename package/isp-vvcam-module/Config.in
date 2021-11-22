@@ -1,8 +1,0 @@
-comment "bdsdmac_module needs a Linux kernel to be built"
-	depends on !BR2_LINUX_KERNEL
-
-config BR2_PACKAGE_ISP_VVCAM_MODULE
-	bool "ISP-VVCAM Kernel module"
-	depends on BR2_LINUX_KERNEL
-	help
-	  Kernel loadable module for ISP.

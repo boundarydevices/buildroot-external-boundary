@@ -1,0 +1,9 @@
+comment "kernel-module-isp-vvcam needs a Linux kernel to be built"
+	depends on !BR2_LINUX_KERNEL
+
+config BR2_PACKAGE_KERNEL_MODULE_ISP_VVCAM
+	bool "kernel-module-isp-vvcam"
+	depends on BR2_LINUX_KERNEL
+	help
+	  Kernel module for the Verisilicon ISP that can be found in
+	  i.MX processors such as the i.MX 8M Plus.

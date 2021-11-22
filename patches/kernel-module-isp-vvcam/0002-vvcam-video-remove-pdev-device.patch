@@ -1,0 +1,65 @@
+From 7632fb69100eb3baa89bc22a9fbaf35ec67e89b3 Mon Sep 17 00:00:00 2001
+From: Gary Bisson <gary.bisson@boundarydevices.com>
+Date: Wed, 6 Oct 2021 20:40:15 +0200
+Subject: [PATCH 2/2] vvcam-video: remove pdev device
+
+As it isn't needed and only generates issues.
+
+Signed-off-by: Gary Bisson <gary.bisson@boundarydevices.com>
+---
+ vvcam/v4l2/video/video.c | 23 ++---------------------
+ 1 file changed, 2 insertions(+), 21 deletions(-)
+
+diff --git a/vvcam/v4l2/video/video.c b/vvcam/v4l2/video/video.c
+index ec36fc3..fb89c65 100644
+--- a/vvcam/v4l2/video/video.c
++++ b/vvcam/v4l2/video/video.c
+@@ -1850,16 +1850,6 @@ static struct v4l2_file_operations video_ops = {
+ 	.mmap = vidioc_mmap,
+ };
+ 
+-static void pdev_release(struct device *dev)
+-{
+-	pr_debug("enter %s\n", __func__);
+-}
+-
+-static struct platform_device viv_pdev = {
+-	.name = "vvcam-video",
+-	.dev.release = pdev_release,
+-};
+-
+ static int viv_s_ctrl(struct v4l2_ctrl *ctrl)
+ {
+ 	struct v4l2_event event;
+@@ -2377,18 +2367,10 @@ static int __init viv_video_init_module(void)
+ 	int ret = 0;
+ 
+ 	pr_info("enter %s\n", __func__);
+-	ret = platform_device_register(&viv_pdev);
+-	if (ret) {
+-		pr_err("register platform device failed.\n");
+-		return ret;
+-	}
+-
+ 	ret = platform_driver_register(&viv_video_driver);
+-	if (ret) {
++	if (ret)
+ 		pr_err("register platform driver failed.\n");
+-		platform_device_unregister(&viv_pdev);
+-		return ret;
+-	}
++
+ 	return ret;
+ }
+ 
+@@ -2397,7 +2379,6 @@ static void __exit viv_video_exit_module(void)
+ 	pr_info("enter %s\n", __func__);
+ 	platform_driver_unregister(&viv_video_driver);
+ 	msleep(100);
+-	platform_device_unregister(&viv_pdev);
+ }
+ 
+ module_init(viv_video_init_module);
+-- 
+2.33.0
+
