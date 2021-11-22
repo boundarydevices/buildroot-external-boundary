@@ -1,0 +1,28 @@
+From 700f9e1e129d97d5ad852d81d3c879132017cc73 Mon Sep 17 00:00:00 2001
+From: Gary Bisson <gary.bisson@boundarydevices.com>
+Date: Tue, 23 Nov 2021 09:58:57 +0100
+Subject: [PATCH] imx/imx8-isp.service: switch to /usr/share/
+
+As Buildroot doesn't want binaries under /opt/
+
+Signed-off-by: Gary Bisson <gary.bisson@boundarydevices.com>
+---
+ imx/imx8-isp.service | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/imx/imx8-isp.service b/imx/imx8-isp.service
+index 5fd683581..3244b96fb 100644
+--- a/imx/imx8-isp.service
++++ b/imx/imx8-isp.service
+@@ -11,7 +11,7 @@ Restart=on-failure
+ RestartSec=5s
+ # ENXIO            
+ #RestartPreventExitStatus=6
+-ExecStart=/opt/imx8-isp/bin/start_isp.sh
++ExecStart=/usr/share/imx8-isp/bin/start_isp.sh
+ 
+ [Install]
+ WantedBy=multi-user.target
+-- 
+2.33.0
+

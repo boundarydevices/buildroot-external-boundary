@@ -1,0 +1,214 @@
+From 5f46a806fc4e5df8c368df9870a60555fa00aeb2 Mon Sep 17 00:00:00 2001
+From: Gary Bisson <gary.bisson@boundarydevices.com>
+Date: Mon, 28 Jun 2021 20:37:54 +0200
+Subject: [PATCH] imx/run.sh: remove bashism
+
+- can't use '+='
+- can't use variable arrays (declare)
+
+Signed-off-by: Gary Bisson <gary.bisson@boundarydevices.com>
+---
+ imx/run.sh | 65 ++++++++++++++++++++++++++----------------------------
+ 1 file changed, 31 insertions(+), 34 deletions(-)
+
+diff --git a/imx/run.sh b/imx/run.sh
+index d3bb03a08..587f0436d 100755
+--- a/imx/run.sh
++++ b/imx/run.sh
+@@ -5,7 +5,7 @@
+ # (c) Basler 2020
+ #
+ 
+-RUN_SCRIPT=`realpath -s $0`
++RUN_SCRIPT=`realpath $0`
+ RUN_SCRIPT_PATH=`dirname $RUN_SCRIPT`
+ echo "RUN_SCRIPT=$RUN_SCRIPT"
+ echo "RUN_SCRIPT_PATH=$RUN_SCRIPT_PATH"
+@@ -15,17 +15,17 @@ LOCAL_RUN="0" # search modules in /lib/modules and libraries in /usr/lib
+ RUN_OPTION=""
+ LOCAL_RUN="0"
+ # an array with the modules to load, insertion order
+-declare -a MODULES=("imx8-media-dev" "vvcam-video" "vvcam-dwe" "vvcam-isp")
++MODULES="imx8-media-dev vvcam-video vvcam-dwe vvcam-isp"
+ 
+ USAGE="Usage:\n"
+-USAGE+="run.sh -c <isp_config> &\n"
+-USAGE+="Supported configurations:\n"
+-USAGE+="\tbasler_1080p60         - single basler camera on MIPI-CSI1, 1920x1080, 60 fps\n"
+-USAGE+="\tdual_basler_1080p60    - dual basler cameras on MIPI-CSI1/2, 1920x1080, 60 fps\n"
+-USAGE+="\tbasler_4k              - single basler camera on MIPI-CSI1, 3840x2160, 30 fps\n"
+-USAGE+="\tbasler_1080p60hdr      - single basler camera on MIPI-CSI1, 1920x1080, 60 fps, HDR configuration\n"
+-USAGE+="\tdual_basler_1080p60hdr - dual basler cameras on MIPI-CSI1/2, 1920x1080, 60 fps, HDR configuration\n"
+-USAGE+="\tbasler_4khdr           - single basler camera on MIPI-CSI1, 3840x2160, 30 fps, HDR configuration\n"
++USAGE=$USAGE"run.sh -c <isp_config> &\n"
++USAGE=$USAGE"Supported configurations:\n"
++USAGE=$USAGE"\tbasler_1080p60         - single basler camera on MIPI-CSI1, 1920x1080, 60 fps\n"
++USAGE=$USAGE"\tdual_basler_1080p60    - dual basler cameras on MIPI-CSI1/2, 1920x1080, 60 fps\n"
++USAGE=$USAGE"\tbasler_4k              - single basler camera on MIPI-CSI1, 3840x2160, 30 fps\n"
++USAGE=$USAGE"\tbasler_1080p60hdr      - single basler camera on MIPI-CSI1, 1920x1080, 60 fps, HDR configuration\n"
++USAGE=$USAGE"\tdual_basler_1080p60hdr - dual basler cameras on MIPI-CSI1/2, 1920x1080, 60 fps, HDR configuration\n"
++USAGE=$USAGE"\tbasler_4khdr           - single basler camera on MIPI-CSI1, 3840x2160, 30 fps, HDR configuration\n"
+ 
+ 
+ # parse command line arguments
+@@ -182,21 +182,18 @@ load_module () {
+ 
+ load_modules () {
+ 	# remove any previous instances of the modules
+-	n=${#MODULES_TO_REMOVE[*]}
+-	for (( i = n-1; i >= 0; i-- ))
++	for i in "${MODULES_TO_REMOVE}"
+ 	do
+-		echo "Removing ${MODULES_TO_REMOVE[i]}..."
+-		rmmod ${MODULES_TO_REMOVE[i]} &>/dev/null
+-		#LSMOD_STATUS=`lsmod | grep "${MODULES[i]}"`
+-		#echo "LSMOD_STATUS=$LSMOD_STATUS"
+-		if lsmod | grep "${MODULES_TO_REMOVE[i]}" ; then
+-			echo "Removing ${MODULES_TO_REMOVE[i]} failed!"
++		echo "Removing $i..."
++		rmmod $i &>/dev/null
++		if lsmod | grep "$i" ; then
++			echo "Removing $i failed!"
+ 			exit 1
+ 		fi
+ 	done
+ 
+ 	# and now clean load the modules
+-	for i in "${MODULES[@]}"
++	for i in "${MODULES}"
+ 	do
+ 		echo "Loading module $i ..."
+ 		load_module $i
+@@ -206,10 +203,10 @@ load_modules () {
+ write_default_mode_files
+ 
+ echo "Trying configuration \"$ISP_CONFIG\"..."
+-MODULES_TO_REMOVE=( "basler-camera-driver-vvcam" "os08a20" "ov2775" "${MODULES[@]}")
++MODULES_TO_REMOVE="basler-camera-driver-vvcam os08a20 ov2775 ${MODULES}"
+ case "$ISP_CONFIG" in
+ 		basler_4k )
+-			MODULES=("basler-camera-driver-vvcam" "${MODULES[@]}")
++			MODULES="basler-camera-driver-vvcam ${MODULES}"
+ 			RUN_OPTION="CAMERA0"
+ 			CAM_NAME="basler-vvcam"
+ 			DRV_FILE="DAA3840_30MC_4K.drv"
+@@ -218,7 +215,7 @@ case "$ISP_CONFIG" in
+ 			write_sensor_cfg_file "Sensor0_Entry.cfg" $CAM_NAME $DRV_FILE $MODE_FILE $MODE
+ 			;;
+ 		basler_1080p60 )
+-			MODULES=("basler-camera-driver-vvcam" "${MODULES[@]}")
++			MODULES="basler-camera-driver-vvcam ${MODULES}"
+ 			RUN_OPTION="CAMERA0"
+ 			CAM_NAME="basler-vvcam"
+ 			DRV_FILE="DAA3840_30MC_1080P.drv"
+@@ -227,7 +224,7 @@ case "$ISP_CONFIG" in
+ 			write_sensor_cfg_file "Sensor0_Entry.cfg" $CAM_NAME $DRV_FILE $MODE_FILE $MODE
+ 			;;
+ 		dual_basler_1080p60 )
+-			MODULES=("basler-camera-driver-vvcam" "${MODULES[@]}")
++			MODULES="basler-camera-driver-vvcam ${MODULES}"
+ 			RUN_OPTION="DUAL_CAMERA"
+ 			CAM_NAME="basler-vvcam"
+ 			DRV_FILE="DAA3840_30MC_1080P.drv"
+@@ -237,7 +234,7 @@ case "$ISP_CONFIG" in
+ 			write_sensor_cfg_file "Sensor1_Entry.cfg" $CAM_NAME $DRV_FILE $MODE_FILE $MODE
+ 			;;
+ 		basler_4khdr )
+-			MODULES=("basler-camera-driver-vvcam" "${MODULES[@]}")
++			MODULES="basler-camera-driver-vvcam ${MODULES}"
+ 			RUN_OPTION="CAMERA0"
+ 			CAM_NAME="basler-vvcam"
+ 			DRV_FILE="DAA3840_30MC_4K.drv"
+@@ -246,7 +243,7 @@ case "$ISP_CONFIG" in
+ 			write_sensor_cfg_file "Sensor0_Entry.cfg" $CAM_NAME $DRV_FILE $MODE_FILE $MODE
+ 			;;
+ 		basler_1080p60hdr )
+-			MODULES=("basler-camera-driver-vvcam" "${MODULES[@]}")
++			MODULES="basler-camera-driver-vvcam ${MODULES}"
+ 			RUN_OPTION="CAMERA0"
+ 			CAM_NAME="basler-vvcam"
+ 			DRV_FILE="DAA3840_30MC_1080P.drv"
+@@ -255,7 +252,7 @@ case "$ISP_CONFIG" in
+ 			write_sensor_cfg_file "Sensor0_Entry.cfg" $CAM_NAME $DRV_FILE $MODE_FILE $MODE
+ 			;;
+ 		dual_basler_1080p60hdr )
+-			MODULES=("basler-camera-driver-vvcam" "${MODULES[@]}")
++			MODULES="basler-camera-driver-vvcam ${MODULES}"
+ 			RUN_OPTION="DUAL_CAMERA"
+ 			CAM_NAME="basler-vvcam"
+ 			DRV_FILE="DAA3840_30MC_1080P.drv"
+@@ -265,7 +262,7 @@ case "$ISP_CONFIG" in
+ 			write_sensor_cfg_file "Sensor1_Entry.cfg" $CAM_NAME $DRV_FILE $MODE_FILE $MODE
+ 			;;
+ 		dual_basler_1080p25hdr )
+-			MODULES=("basler-camera-driver-vvcam" "${MODULES[@]}")
++			MODULES="basler-camera-driver-vvcam ${MODULES}"
+ 			RUN_OPTION="DUAL_CAMERA"
+ 			CAM_NAME="basler-vvcam"
+ 			DRV_FILE="DAA3840_30MC_1080P.drv"
+@@ -275,7 +272,7 @@ case "$ISP_CONFIG" in
+ 			write_sensor_cfg_file "Sensor1_Entry.cfg" $CAM_NAME $DRV_FILE $MODE_FILE $MODE
+ 			;;
+ 		ov2775_1080p30 )
+-			MODULES=("ov2775" "${MODULES[@]}")
++			MODULES="ov2775 ${MODULES}"
+ 			RUN_OPTION="CAMERA0"
+ 			CAM_NAME="ov2775"
+ 			DRV_FILE="ov2775.drv"
+@@ -284,7 +281,7 @@ case "$ISP_CONFIG" in
+ 			write_sensor_cfg_file "Sensor0_Entry.cfg" $CAM_NAME $DRV_FILE $MODE_FILE $MODE
+ 			;;
+ 		dual_ov2775_1080p30 )
+-			MODULES=("ov2775" "${MODULES[@]}")
++			MODULES="ov2775 ${MODULES}"
+ 			RUN_OPTION="DUAL_CAMERA"
+ 			CAM_NAME="ov2775"
+ 			DRV_FILE="ov2775.drv"
+@@ -294,7 +291,7 @@ case "$ISP_CONFIG" in
+ 			write_sensor_cfg_file "Sensor1_Entry.cfg" $CAM_NAME $DRV_FILE $MODE_FILE $MODE
+ 			;;
+ 		ov2775_1080p30hdr )
+-			MODULES=("ov2775" "${MODULES[@]}")
++			MODULES="ov2775 ${MODULES}"
+ 			RUN_OPTION="CAMERA0"
+ 			CAM_NAME="ov2775"
+ 			DRV_FILE="ov2775.drv"
+@@ -303,7 +300,7 @@ case "$ISP_CONFIG" in
+ 			write_sensor_cfg_file "Sensor0_Entry.cfg" $CAM_NAME $DRV_FILE $MODE_FILE $MODE
+ 			;;
+ 		dual_ov2775_1080p30hdr )
+-			MODULES=("ov2775" "${MODULES[@]}")
++			MODULES="ov2775 ${MODULES}"
+ 			RUN_OPTION="DUAL_CAMERA"
+ 			CAM_NAME="ov2775"
+ 			DRV_FILE="ov2775.drv"
+@@ -313,7 +310,7 @@ case "$ISP_CONFIG" in
+ 			write_sensor_cfg_file "Sensor1_Entry.cfg" $CAM_NAME $DRV_FILE $MODE_FILE $MODE
+ 			;;
+ 		ov2775_1080p30hdr_native )
+-			MODULES=("ov2775" "${MODULES[@]}")
++			MODULES="ov2775 ${MODULES}"
+ 			RUN_OPTION="CAMERA0"
+ 			CAM_NAME="ov2775"
+ 			DRV_FILE="ov2775.drv"
+@@ -322,7 +319,7 @@ case "$ISP_CONFIG" in
+ 			write_sensor_cfg_file "Sensor0_Entry.cfg" $CAM_NAME $DRV_FILE $MODE_FILE $MODE
+ 			;;
+ 		ov2775_720p )
+-			MODULES=("ov2775" "${MODULES[@]}")
++			MODULES="ov2775 ${MODULES}"
+ 			RUN_OPTION="CAMERA0"
+ 			CAM_NAME="ov2775"
+ 			DRV_FILE="ov2775.drv"
+@@ -331,7 +328,7 @@ case "$ISP_CONFIG" in
+ 			write_sensor_cfg_file "Sensor0_Entry.cfg" $CAM_NAME $DRV_FILE $MODE_FILE $MODE
+ 			;;
+ 		os08a20_4k )
+-			MODULES=("os08a20" "${MODULES[@]}")
++			MODULES="os08a20 ${MODULES}"
+ 			RUN_OPTION="CAMERA0"
+ 			CAM_NAME="os08a20"
+ 			DRV_FILE="os08a20.drv"
+-- 
+2.33.0
+

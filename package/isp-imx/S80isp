@@ -2,9 +2,10 @@
 
 case "$1" in
 	start|"")
-		/bin/sh /opt/imx8-isp/bin/start_isp.sh &
+		/bin/sh /usr/share/imx8-isp/bin/start_isp.sh &
 		;;
 	stop)
+		killall -q isp_media_server
 		;;
 	restart|reload)
 		$0 stop
