@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-GST1_IMX_V2_VERSION = ba5ad44fdcb91a7310771b8ddfd426ef95d5984e
+GST1_IMX_V2_VERSION = 2.0.0
 GST1_IMX_V2_SITE = $(call github,Freescale,gstreamer-imx,$(GST1_IMX_V2_VERSION))
 GST1_IMX_V2_LICENSE = LGPL-2.0+
 GST1_IMX_V2_LICENSE_FILES = LICENSE
