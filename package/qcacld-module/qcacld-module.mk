@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-QCACLD_MODULE_VERSION = 300ac71f3ad330f6761506227abab160746774bb
+QCACLD_MODULE_VERSION = 99f0ed2a648facf2c1a3f8d484ed2593611d6b15
 QCACLD_MODULE_SITE = \
 	$(call github,boundarydevices,qcacld-2.0,$(QCACLD_MODULE_VERSION))
 QCACLD_MODULE_LICENSE = ISC, BSD-like, GPL-2.0+
