@@ -1,0 +1,293 @@
+From ed4f4e8fcec63243f6749cfaccf928d09582c0f4 Mon Sep 17 00:00:00 2001
+From: Song Bing <bing.song@nxp.com>
+Date: Fri, 23 Mar 2018 15:13:55 -0700
+Subject: [PATCH 1/4] allocators: Add GstDmabufMeta
+
+This meta can be added to the allocation query to indicate support
+for dmabuf memory.  Optionally the drm_modifier can also be set in
+the allocation query to indicate that the element supports some
+certain set of drm modifiers (swizzling/tiling/compression/etc).
+When the meta is attached to a buffer, the drm_modifier should
+only be one which the src and sink both indicated support for in
+the allocation query.
+
+https://bugzilla.gnome.org/show_bug.cgi?id=779146
+
+Conflicts:
+	gst-libs/gst/allocators/meson.build
+(cherry picked from commit 243e5bb8210bd4133bfcceab205680bb018e4348)
+---
+ gst-libs/gst/allocators/allocators.h    |   1 +
+ gst-libs/gst/allocators/gstdmabufmeta.c | 161 ++++++++++++++++++++++++
+ gst-libs/gst/allocators/gstdmabufmeta.h |  60 +++++++++
+ gst-libs/gst/allocators/meson.build     |   4 +-
+ 4 files changed, 225 insertions(+), 1 deletion(-)
+ create mode 100644 gst-libs/gst/allocators/gstdmabufmeta.c
+ create mode 100644 gst-libs/gst/allocators/gstdmabufmeta.h
+
+diff --git a/gst-libs/gst/allocators/allocators.h b/gst-libs/gst/allocators/allocators.h
+index b616aa20e..14a49d425 100644
+--- a/gst-libs/gst/allocators/allocators.h
++++ b/gst-libs/gst/allocators/allocators.h
+@@ -27,6 +27,7 @@
+ #include <gst/allocators/gstdmabuf.h>
+ #include <gst/allocators/gstfdmemory.h>
+ #include <gst/allocators/gstphysmemory.h>
++#include <gst/allocators/gstdmabufmeta.h>
+ 
+ #endif /* __GST_ALLOCATORS_H__ */
+ 
+diff --git a/gst-libs/gst/allocators/gstdmabufmeta.c b/gst-libs/gst/allocators/gstdmabufmeta.c
+new file mode 100644
+index 000000000..e881e2ad9
+--- /dev/null
++++ b/gst-libs/gst/allocators/gstdmabufmeta.c
+@@ -0,0 +1,161 @@
++/*
++ * GStreamer
++ * Copyright (C) 2017 Intel Corporation
++ *
++ * This library is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Library General Public
++ * License as published by the Free Software Foundation; either
++ * version 2 of the License, or (at your option) any later version.
++ *
++ * This library is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * Library General Public License for more details.
++ *
++ * You should have received a copy of the GNU Library General Public
++ * License along with this library; if not, write to the
++ * Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
++ * Boston, MA 02110-1301, USA.
++ */
++
++/**
++ * SECTION:gstdmabufmeta
++ * @short_description: dmabuf metadata
++ * @see_also: #GstDmaBufAllocator
++ *
++ * #GstDmabufMeta carries metadata that goes along with
++ * dmabuf memory in the buffer, like drm modifier.
++ */
++
++#ifdef HAVE_CONFIG_H
++#include "config.h"
++#endif
++
++#include "gstdmabufmeta.h"
++
++/**
++ * gst_buffer_add_dmabuf_meta:
++ * @buffer: a #GstBuffer
++ * @modifier: the drm modifier
++ *
++ * Returns: (transfer none): the #GstDmabufMeta added to #GstBuffer
++ *
++ * Since: 1.12
++ */
++GstDmabufMeta *
++gst_buffer_add_dmabuf_meta (GstBuffer * buffer, guint64 drm_modifier)
++{
++  GstDmabufMeta *meta;
++
++  meta =
++      (GstDmabufMeta *) gst_buffer_add_meta ((buffer),
++      GST_DMABUF_META_INFO, NULL);
++
++  if (!meta)
++    return NULL;
++
++  meta->drm_modifier = drm_modifier;
++
++  return meta;
++}
++
++static gboolean
++gst_dmabuf_meta_transform (GstBuffer * dest, GstMeta * meta,
++    GstBuffer * buffer, GQuark type, gpointer data)
++{
++  GstDmabufMeta *dmeta, *smeta;
++
++  smeta = (GstDmabufMeta *) meta;
++
++  if (GST_META_TRANSFORM_IS_COPY (type)) {
++    GstMetaTransformCopy *copy = data;
++
++    if (!copy->region) {
++      /* only copy if the complete data is copied as well */
++      dmeta = gst_buffer_add_dmabuf_meta (dest, smeta->drm_modifier);
++      if (!dmeta)
++        return FALSE;
++    }
++  } else {
++    /* return FALSE, if transform type is not supported */
++    return FALSE;
++  }
++
++  return TRUE;
++}
++
++static void
++gst_dmabuf_meta_free (GstMeta * meta, GstBuffer * buffer)
++{
++  ((GstDmabufMeta *) meta)->drm_modifier = 0;
++
++  return;
++}
++
++static gboolean
++gst_dmabuf_meta_init (GstMeta * meta, gpointer params, GstBuffer * buffer)
++{
++  ((GstDmabufMeta *) meta)->drm_modifier = 0;
++
++  return TRUE;
++}
++
++GType
++gst_dmabuf_meta_api_get_type (void)
++{
++  static volatile GType type = 0;
++  static const gchar *tags[] = { NULL };
++
++  if (g_once_init_enter (&type)) {
++    GType _type = gst_meta_api_type_register ("GstDmabufMetaAPI", tags);
++    g_once_init_leave (&type, _type);
++  }
++
++  return type;
++}
++
++const GstMetaInfo *
++gst_dmabuf_meta_get_info (void)
++{
++  static const GstMetaInfo *meta_info = NULL;
++
++  if (g_once_init_enter (&meta_info)) {
++    const GstMetaInfo *meta = gst_meta_register (GST_DMABUF_META_API_TYPE,
++        "GstDmabufMeta",
++        sizeof (GstDmabufMeta), gst_dmabuf_meta_init,
++        gst_dmabuf_meta_free,
++        gst_dmabuf_meta_transform);
++    g_once_init_leave (&meta_info, meta);
++  }
++
++  return meta_info;
++}
++
++void
++gst_query_add_allocation_dmabuf_meta (GstQuery * query, guint64 drm_modifier)
++{
++  guint index;
++  GstStructure *params;
++
++  if (!gst_query_find_allocation_meta (query, GST_DMABUF_META_API_TYPE, &index)) {
++    gchar *str =
++        g_strdup_printf ("GstDmabufMeta, dmabuf.drm_modifier=(guint64){ %"
++        G_GUINT64_FORMAT " };", drm_modifier);
++
++    params = gst_structure_new_from_string (str);
++    g_free (str);
++
++    gst_query_add_allocation_meta (query, GST_DMABUF_META_API_TYPE, params);
++    gst_structure_free (params);
++  } else {
++    GValue newlist = G_VALUE_INIT, drm_modifier_value = G_VALUE_INIT;
++
++    gst_query_parse_nth_allocation_meta (query, index,
++        (const GstStructure **) &params);
++    g_value_init (&drm_modifier_value, G_TYPE_UINT64);
++    g_value_set_uint64 (&drm_modifier_value, drm_modifier);
++    gst_value_list_merge (&newlist, gst_structure_get_value (params,
++            "dmabuf.drm_modifier"), &drm_modifier_value);
++    gst_structure_take_value (params, "dmabuf.drm_modifier", &newlist);
++  }
++}
+diff --git a/gst-libs/gst/allocators/gstdmabufmeta.h b/gst-libs/gst/allocators/gstdmabufmeta.h
+new file mode 100644
+index 000000000..1af80fd15
+--- /dev/null
++++ b/gst-libs/gst/allocators/gstdmabufmeta.h
+@@ -0,0 +1,60 @@
++/*
++ * GStreamer
++ * Copyright (C) 2017 Intel Corporation
++ *
++ * This library is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Library General Public
++ * License as published by the Free Software Foundation; either
++ * version 2 of the License, or (at your option) any later version.
++ *
++ * This library is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * Library General Public License for more details.
++ *
++ * You should have received a copy of the GNU Library General Public
++ * License along with this library; if not, write to the
++ * Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
++ * Boston, MA 02110-1301, USA.
++ */
++
++#ifndef __GST_DMABUF_META_H__
++#define __GST_DMABUF_META_H__
++
++#include <gst/gstmeta.h>
++#include <gst/gstquery.h>
++#include <gst/gstvalue.h>
++
++G_BEGIN_DECLS
++
++#define GST_DMABUF_META_API_TYPE (gst_dmabuf_meta_api_get_type())
++#define GST_DMABUF_META_INFO     (gst_dmabuf_meta_get_info())
++typedef struct _GstDmabufMeta GstDmabufMeta;
++
++/**
++ * GstDmabufMeta:
++ * @parent: the parent #GstMeta
++ * @modifier: DRM modifier
++ */
++struct _GstDmabufMeta
++{
++  GstMeta parent;
++
++  guint64 drm_modifier;
++};
++
++GST_EXPORT
++GType gst_dmabuf_meta_api_get_type (void);
++GST_EXPORT
++const GstMetaInfo *gst_dmabuf_meta_get_info (void);
++
++#define gst_buffer_get_dmabuf_meta(b) ((GstDmabufMeta*)gst_buffer_get_meta((b),GST_DMABUF_META_API_TYPE))
++
++GST_EXPORT
++GstDmabufMeta * gst_buffer_add_dmabuf_meta (GstBuffer * buffer, guint64 drm_modifier);
++
++GST_EXPORT
++void gst_query_add_allocation_dmabuf_meta (GstQuery * query, guint64 drm_modifier);
++
++G_END_DECLS
++#endif /* __GST_DMABUF_META_H__ */
+diff --git a/gst-libs/gst/allocators/meson.build b/gst-libs/gst/allocators/meson.build
+index 0c89e3c2e..ed2fa280c 100644
+--- a/gst-libs/gst/allocators/meson.build
++++ b/gst-libs/gst/allocators/meson.build
+@@ -4,10 +4,12 @@ gst_allocators_headers = files([
+   'gstfdmemory.h',
+   'gstphysmemory.h',
+   'gstdmabuf.h',
++  'gstdmabufmeta.h',
+ ])
+ install_headers(gst_allocators_headers, subdir : 'gstreamer-1.0/gst/allocators/')
+ 
+-gst_allocators_sources = files([ 'gstdmabuf.c', 'gstfdmemory.c', 'gstphysmemory.c'])
++gst_allocators_sources = files([ 'gstdmabuf.c', 'gstfdmemory.c', 'gstphysmemory.c', 'gstdmabufmeta.c'])
++
+ gstallocators = library('gstallocators-@0@'.format(api_version),
+   gst_allocators_sources,
+   c_args : gst_plugins_base_args + ['-DBUILDING_GST_ALLOCATORS', '-DG_LOG_DOMAIN="GStreamer-Allocators"'],
+-- 
+2.34.1
+

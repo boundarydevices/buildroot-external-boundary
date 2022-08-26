@@ -1,0 +1,48 @@
+From aa5d2ea89bf16993fca40ef2fcc4cb1854a9e631 Mon Sep 17 00:00:00 2001
+From: Wujian sun <wujian.sun_1@nxp.com>
+Date: Wed, 14 Jul 2021 10:36:26 +0800
+Subject: [PATCH 1/1] libdrm: amphion: Add Amphion VPU tiled format.
+
+Upstream-Status: Inappropriate [i.MX specific]
+
+[xianzhong => change amphion fourcc to 0xf0]
+
+Signed-off-by: Song Bing <bing.song@nxp.com>
+(cherry picked from commit 1fe62d12321cb060099f7a5d1ae09f8c03449fcf)
+(cherry picked from commit 52d2f24ccafec7c365e6fafa222bd71ac138ad34)
+---
+ include/drm/drm_fourcc.h | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/include/drm/drm_fourcc.h b/include/drm/drm_fourcc.h
+index ea6d3f6c..39474a39 100644
+--- a/include/drm/drm_fourcc.h
++++ b/include/drm/drm_fourcc.h
+@@ -372,6 +372,7 @@ extern "C" {
+ #define DRM_FORMAT_MOD_VENDOR_ARM     0x08
+ #define DRM_FORMAT_MOD_VENDOR_ALLWINNER 0x09
+ #define DRM_FORMAT_MOD_VENDOR_AMLOGIC 0x0a
++#define DRM_FORMAT_MOD_VENDOR_AMPHION  0xf0
+ 
+ /* add more to the end as needed */
+ 
+@@ -1148,6 +1149,16 @@ drm_fourcc_canonicalize_nvidia_format_mod(__u64 modifier)
+  */
+ #define DRM_FORMAT_MOD_ALLWINNER_TILED fourcc_mod_code(ALLWINNER, 1)
+ 
++/* Amphion tiled layout */
++
++/*
++ * Amphion 8x128 tiling layout
++ *
++ * This is a tiled layout using 8x128 pixel vertical strips, where each strip
++ * contains 1x16 groups of 8x8 pixels in a row-major layout.
++ */
++#define DRM_FORMAT_MOD_AMPHION_TILED fourcc_mod_code(AMPHION, 1)
++
+ /*
+  * Amlogic Video Framebuffer Compression modifiers
+  *
+-- 
+2.34.1
+

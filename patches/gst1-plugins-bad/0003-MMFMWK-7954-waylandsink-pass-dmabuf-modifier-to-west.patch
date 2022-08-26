@@ -1,0 +1,86 @@
+From 9d0d097f52860796e5ad59a7f50cf97c07816111 Mon Sep 17 00:00:00 2001
+From: Haihua Hu <jared.hu@nxp.com>
+Date: Mon, 23 Apr 2018 12:38:38 +0800
+Subject: [PATCH 3/8] MMFMWK-7954 waylandsink: pass dmabuf modifier to weston
+
+upstream status: imx specific
+
+(cherry picked from commit 78d9555078c83b1b09bc603b9bbd05c9313d2611)
+---
+ ext/wayland/gstwaylandsink.c | 8 ++++++++
+ ext/wayland/wllinuxdmabuf.c  | 9 ++++++++-
+ 2 files changed, 16 insertions(+), 1 deletion(-)
+
+diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
+index bd0e1a9e6..4410d1060 100644
+--- a/ext/wayland/gstwaylandsink.c
++++ b/ext/wayland/gstwaylandsink.c
+@@ -51,6 +51,10 @@
+ #include <gst/wayland/wayland.h>
+ #include <gst/video/videooverlay.h>
+ 
++#include <drm_fourcc.h>
++#include <xf86drm.h>
++#include <xf86drmMode.h>
++
+ /* signals */
+ enum
+ {
+@@ -632,9 +636,13 @@ gst_wayland_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
+   GstBufferPool *pool = NULL;
+   gboolean need_pool;
+   GstAllocator *alloc;
++  guint64 drm_modifier;
+ 
+   gst_query_parse_allocation (query, &caps, &need_pool);
+ 
++  drm_modifier = DRM_FORMAT_MOD_AMPHION_TILED;
++  gst_query_add_allocation_dmabuf_meta (query, drm_modifier);
++
+   if (need_pool)
+     pool = gst_wayland_create_pool (sink, caps);
+ 
+diff --git a/ext/wayland/wllinuxdmabuf.c b/ext/wayland/wllinuxdmabuf.c
+index 96487d142..5314c5e4c 100644
+--- a/ext/wayland/wllinuxdmabuf.c
++++ b/ext/wayland/wllinuxdmabuf.c
+@@ -24,6 +24,7 @@
+ #endif
+ 
+ #include <gst/allocators/gstdmabuf.h>
++#include <gst/allocators/gstdmabufmeta.h>
+ 
+ #include "wllinuxdmabuf.h"
+ #include "wlvideoformat.h"
+@@ -79,6 +80,8 @@ gst_wl_linux_dmabuf_construct_wl_buffer (GstBuffer * buf,
+   struct zwp_linux_buffer_params_v1 *params;
+   gint64 timeout;
+   ConstructBufferData data;
++  GstDmabufMeta *dmabuf_meta;
++  gint64 drm_modifier = 0;
+ 
+   g_return_val_if_fail (gst_wl_display_check_format_for_dmabuf (display,
+           GST_VIDEO_INFO_FORMAT (info)), NULL);
+@@ -94,6 +97,10 @@ gst_wl_linux_dmabuf_construct_wl_buffer (GstBuffer * buf,
+   height = GST_VIDEO_INFO_HEIGHT (info);
+   nplanes = GST_VIDEO_INFO_N_PLANES (info);
+ 
++  dmabuf_meta = gst_buffer_get_dmabuf_meta (buf);
++  if (dmabuf_meta)
++    drm_modifier = dmabuf_meta->drm_modifier;
++
+   GST_DEBUG_OBJECT (display, "Creating wl_buffer from DMABuf of size %"
+       G_GSSIZE_FORMAT " (%d x %d), format %s", info->size, width, height,
+       gst_wl_dmabuf_format_to_string (format));
+@@ -111,7 +118,7 @@ gst_wl_linux_dmabuf_construct_wl_buffer (GstBuffer * buf,
+       GstMemory *m = gst_buffer_peek_memory (buf, mem_idx);
+       gint fd = gst_dmabuf_memory_get_fd (m);
+       zwp_linux_buffer_params_v1_add (params, fd, i, m->offset + skip,
+-          stride, 0, 0);
++          stride, drm_modifier >> 32, drm_modifier & 0xffffffff);
+     } else {
+       GST_ERROR_OBJECT (mem->allocator, "memory does not seem to contain "
+           "enough data for the specified format");
+-- 
+2.34.1
+
