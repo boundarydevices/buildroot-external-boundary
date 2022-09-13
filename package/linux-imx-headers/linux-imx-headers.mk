@@ -11,7 +11,6 @@ IMX_UAPI_HEADERS = \
 	dma-buf.h \
 	hantrodec.h \
 	hx280enc.h \
-	ion.h \
 	ipu.h \
 	isl29023.h \
 	mxc_asrc.h \
@@ -34,9 +33,7 @@ define LINUX_IMX_HEADERS_CONFIGURE_CMDS
 		HOSTCFLAGS="$(HOSTCFLAGS)" \
 		HOSTCXX="$(HOSTCXX)" \
 		INSTALL_HDR_PATH=$(@D) \
-		headers_install; \
-	cp $(LINUX_DIR)/drivers/staging/android/uapi/ion.h \
-		$(@D)/include/linux/ion.h;
+		headers_install;
 endef
 
 define LINUX_IMX_HEADERS_INSTALL_STAGING_CMDS
