@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-KERNEL_MODULE_ISP_VVCAM_VERSION = 47588cb88cc75400b5d2c35a17527e99b752d9be
+KERNEL_MODULE_ISP_VVCAM_VERSION = 551415470092d6af1d7e11e7a78591f5800333f9
 KERNEL_MODULE_ISP_VVCAM_SITE = https://source.codeaurora.org/external/imx/isp-vvcam
 KERNEL_MODULE_ISP_VVCAM_SITE_METHOD = git
 KERNEL_MODULE_ISP_VVCAM_LICENSE = GPL-2.0
