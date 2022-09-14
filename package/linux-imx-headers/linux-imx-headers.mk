@@ -9,6 +9,7 @@ LINUX_IMX_HEADERS_INSTALL_STAGING = YES
 
 IMX_UAPI_HEADERS = \
 	dma-buf.h \
+	dma-heap.h \
 	hantrodec.h \
 	hx280enc.h \
 	ipu.h \
