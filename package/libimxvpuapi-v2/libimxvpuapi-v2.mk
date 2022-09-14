@@ -4,11 +4,11 @@
 #
 ################################################################################
 
-LIBIMXVPUAPI_V2_VERSION = 2.2.0
+LIBIMXVPUAPI_V2_VERSION = 2.2.1
 LIBIMXVPUAPI_V2_SITE = $(call github,Freescale,libimxvpuapi,$(LIBIMXVPUAPI_V2_VERSION))
 LIBIMXVPUAPI_V2_LICENSE = LGPL-2.1+
 LIBIMXVPUAPI_V2_LICENSE_FILES = LICENSE
-LIBIMXVPUAPI_V2_DEPENDENCIES = host-pkgconf host-python imx-vpu-hantro libimxdmabuffer
+LIBIMXVPUAPI_V2_DEPENDENCIES = host-pkgconf host-python3 imx-vpu-hantro libimxdmabuffer
 LIBIMXVPUAPI_V2_DEPENDENCIES += linux
 LIBIMXVPUAPI_V2_INSTALL_STAGING = YES
 LIBIMXVPUAPI_V2_NEEDS_EXTERNAL_WAF = YES
