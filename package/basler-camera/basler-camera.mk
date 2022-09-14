@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-BASLER_CAMERA_VERSION = 4.2.2.13.0
+BASLER_CAMERA_VERSION = 4.2.2.18.0
 BASLER_CAMERA_SITE = $(FREESCALE_IMX_SITE)
 BASLER_CAMERA_SOURCE = basler-camera-$(BASLER_CAMERA_VERSION).bin
 BASLER_CAMERA_DEPENDENCIES = linux
@@ -19,8 +19,7 @@ endef
 
 define BASLER_CAMERA_INSTALL_TARGET_CMDS
 	cp -r $(@D)/opt/* $(TARGET_DIR)/usr/share/
-	ln -sf /usr/share/imx8-isp/bin/DAA3840_30MC_1080P.drv $(TARGET_DIR)/usr/lib64/DAA3840_30MC_1080P.drv
-	ln -sf /usr/share/imx8-isp/bin/DAA3840_30MC_4K.drv $(TARGET_DIR)/usr/lib64/DAA3840_30MC_4K.drv
+	ln -sf /usr/share/imx8-isp/bin/daA3840_30mc.drv $(TARGET_DIR)/usr/lib64/daA3840_30mc.drv
 	cp -r $(@D)/usr/* $(TARGET_DIR)/usr/
 endef
 
