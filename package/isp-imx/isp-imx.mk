@@ -4,10 +4,10 @@
 #
 ################################################################################
 
-ISP_IMX_VERSION = 4.2.2.13.0
+ISP_IMX_VERSION = 4.2.2.18.0
 ISP_IMX_SITE = $(FREESCALE_IMX_SITE)
 ISP_IMX_SOURCE = isp-imx-$(ISP_IMX_VERSION).bin
-ISP_IMX_DEPENDENCIES = linux linux-imx-headers python3 libdrm
+ISP_IMX_DEPENDENCIES = linux linux-imx-headers python3 libdrm tinyxml2
 ISP_IMX_LICENSE = NXP Semiconductor Software License Agreement
 ISP_IMX_LICENSE_FILES = EULA COPYING
 ISP_IMX_REDISTRIBUTE = NO
@@ -27,6 +27,7 @@ ISP_IMX_CONF_OPTS += \
 	-DENABLE_IRQ=1 \
 	-DPARTITION_BUILD=0 \
 	-D3A_SRC_BUILD=0 \
+	-DSDKTARGETSYSROOT=$(STAGING_DIR) \
 	-Wno-dev
 
 ifeq ($(BR2_PACKAGE_IMX_GPU_G2D),y)

@@ -1,11 +1,11 @@
-From 700f9e1e129d97d5ad852d81d3c879132017cc73 Mon Sep 17 00:00:00 2001
-From: Gary Bisson <gary.bisson@boundarydevices.com>
-Date: Tue, 23 Nov 2021 09:58:57 +0100
-Subject: [PATCH] imx/imx8-isp.service: switch to /usr/share/
+From 1f7d6bbde71c974692a30b1bced9c213dd48ee34 Mon Sep 17 00:00:00 2001
+From: Chris Dimich <chris.dimich@boundarydevices.com>
+Date: Tue, 13 Sep 2022 20:06:18 -0700
+Subject: [PATCH 1/1] imx/imx8-isp.service: switch to /usr/share/
 
 As Buildroot doesn't want binaries under /opt/
 
-Signed-off-by: Gary Bisson <gary.bisson@boundarydevices.com>
+Signed-off-by: Chris Dimich <chris.dimich@boundarydevices.com>
 ---
  imx/imx8-isp.service | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
@@ -24,5 +24,5 @@ index 5fd683581..3244b96fb 100644
  [Install]
  WantedBy=multi-user.target
 -- 
-2.33.0
+2.34.1
 

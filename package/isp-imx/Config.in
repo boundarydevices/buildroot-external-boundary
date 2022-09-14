@@ -7,6 +7,7 @@ config BR2_PACKAGE_ISP_IMX
 	select BR2_PACKAGE_LIBDRM
 	select BR2_PACKAGE_LINUX_IMX_HEADERS
 	select BR2_PACKAGE_PYTHON3
+	select BR2_PACKAGE_TINYXML2
 	help
 	  ISP daemon for the Verisilicon Software ISP as well as config
 	  files for some camera sensors (ov2775, IMX290, OS08a20).

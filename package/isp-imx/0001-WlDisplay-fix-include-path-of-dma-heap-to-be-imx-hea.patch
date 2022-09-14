@@ -1,0 +1,30 @@
+From df88b1292654874db57f765bd374b175f8625634 Mon Sep 17 00:00:00 2001
+From: Chris Dimich <chris.dimich@boundarydevices.com>
+Date: Tue, 13 Sep 2022 20:12:32 -0700
+Subject: [PATCH 1/1] WlDisplay: fix include path of dma-heap to be imx header
+
+to address error:
+
+fatal error: linux/dma-heap.h: No such file or directory
+
+Signed-off-by: Chris Dimich <chris.dimich@boundarydevices.com>
+---
+ appshell/display/WlDisplay.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/appshell/display/WlDisplay.cpp b/appshell/display/WlDisplay.cpp
+index 3201be888..4f29e06a5 100644
+--- a/appshell/display/WlDisplay.cpp
++++ b/appshell/display/WlDisplay.cpp
+@@ -10,7 +10,7 @@
+ #include <sys/ioctl.h>
+ #include <imx/linux/dma-buf.h>
+ #include <linux/videodev2.h>
+-#include <linux/dma-heap.h>
++#include <imx/linux/dma-heap.h>
+ #include <g2dExt.h>
+ 
+ #include "log.h"
+-- 
+2.34.1
+
