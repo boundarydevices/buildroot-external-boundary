@@ -1,0 +1,73 @@
+From ccc9d40d77ca32b0b3d698a21762494f9ec64526 Mon Sep 17 00:00:00 2001
+From: Gary Bisson <gary.bisson@boundarydevices.com>
+Date: Fri, 23 Sep 2022 16:57:29 +0200
+Subject: [PATCH] content: remove unsupported views
+
+Definitely broken on 5.15.8, to be investigated.
+Might requires a patch like 0001-Fix-execution-problem-with-Qt5.3.patch
+
+Signed-off-by: Gary Bisson <gary.bisson@boundarydevices.com>
+---
+ content/InfoView.qml | 30 ------------------------------
+ content/MainView.qml |  4 ----
+ 2 files changed, 34 deletions(-)
+
+diff --git a/content/InfoView.qml b/content/InfoView.qml
+index dee035e..86bb6d2 100644
+--- a/content/InfoView.qml
++++ b/content/InfoView.qml
+@@ -156,36 +156,6 @@ Item {
+                     source: "images/heading.png"
+                 }
+ 
+-                InfoViewItem {
+-                    text: "Welcome to <i>'Cinematic Experience'</i> demo. This application demonstrates the power of Qt5 and few of the new additions available in QtQuick 2.0. Below is a short summary of those new features which have been used in this demo application."
+-                    image: "images/qt_logo2.png"
+-                }
+-                InfoViewItem {
+-                    text: "<b>Rendering</b><br/>Qt5 has brand new rendering backend 'QML SceneGraph' which is optimized for hardware accelerated rendering. This allows to take full gains out of OpenGL powered GPUs on desktop and embedded devices. Not just performance, new Qt5 rendering backend also allows features which have not been possible earlier."
+-                }
+-                InfoViewItem {
+-                    text: "<b>Particles</b><br/>Qt5 comes with a fresh particles plugin 'QtQuick.Particles 2.0' which is superior compared to Qt4 particles. In this demo application, twinkling stars, shooting star and fog/smoke have been implemented using this new particles engine. Superb."
+-                    image: "images/sc2.png"
+-                }
+-                InfoViewItem {
+-                    text: "<b>Sprites</b><br/>QtQuick 2.0 has built-in support for sprites using Sprite, SpriteSequence and AnimatedSprite elements. Sprites can also be used as a source for particles. In this demo application, shooting star is an AnimatedSprite with 16 frames."
+-                    image: "images/sc5.png"
+-                    switchedLayout: true
+-                }
+-                InfoViewItem {
+-                    text: "<b>Animations</b><br/>QtQuick has always had a very strong animations support. Qt5 supports now also animations along a non-linear paths using PathAnimation and PathInterpolator QML elements. In this demo, shooting star position moves along PathAnimation using PathCurves."
+-                    image: "images/sc1.png"
+-                }
+-                InfoViewItem {
+-                    text: "<b>ShaderEffects</b><br/>Qt5 supports ShaderEffect and ShaderEffectSource QML elements which allow writing custom GLSL shader effects. This gives developers a lot of control to transform and enhance QML UIs by increasing dynamicity. In this demo, custom shader effect is used for lighting the movie delegates."
+-                    image: "images/sc3.png"
+-                    switchedLayout: true
+-                }
+-                InfoViewItem {
+-                    text: "<b>Graphical Effects</b><br/>Qt5 comes with pre-defined set of effects such as drop-shadow, blur, glow, colorize etc. These are available in 'QtGraphicalEffects 1.0' plugin. In this demo, DropShadow is used to improve the appearance of movie title texts."
+-                    image: "images/sc4.png"
+-                }
+-
+                 Row {
+                     anchors.horizontalCenter: parent.horizontalCenter
+                     height: 128
+diff --git a/content/MainView.qml b/content/MainView.qml
+index 3b38782..f1e4dd4 100644
+--- a/content/MainView.qml
++++ b/content/MainView.qml
+@@ -208,10 +208,6 @@ Item {
+                 strength: 60
+             }
+         }
+-
+-        SettingsView {
+-            id: settingsView
+-        }
+     }
+ 
+     FastBlur {
+-- 
+2.35.1
+
