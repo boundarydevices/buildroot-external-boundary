@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-ISP_IMX_VERSION = 4.2.2.18.0
+ISP_IMX_VERSION = 4.2.2.20.0
 ISP_IMX_SITE = $(FREESCALE_IMX_SITE)
 ISP_IMX_SOURCE = isp-imx-$(ISP_IMX_VERSION).bin
 ISP_IMX_DEPENDENCIES = linux linux-imx-headers python3 libdrm tinyxml2
@@ -43,10 +43,11 @@ endef
 
 define ISP_IMX_INSTALL_TARGET_CMDS
 	mkdir -p $(TARGET_DIR)/usr/share/imx8-isp/bin
-	cp -r $(@D)/$(ISP_IMX_SUBDIR)/generated/release/bin/*08a20* $(TARGET_DIR)/usr/share/imx8-isp/bin
-	cp -r $(@D)/$(ISP_IMX_SUBDIR)/generated/release/bin/isp_media_server $(TARGET_DIR)/usr/share/imx8-isp/bin
 	cp -r $(@D)/$(ISP_IMX_SUBDIR)/generated/release/bin/*_test $(TARGET_DIR)/usr/share/imx8-isp/bin
+	cp -r $(@D)/$(ISP_IMX_SUBDIR)/generated/release/bin/*.xml $(TARGET_DIR)/usr/share/imx8-isp/bin
+	cp -r $(@D)/$(ISP_IMX_SUBDIR)/generated/release/bin/isp_media_server $(TARGET_DIR)/usr/share/imx8-isp/bin
 	cp -r $(@D)/$(ISP_IMX_SUBDIR)/generated/release/bin/vvext $(TARGET_DIR)/usr/share/imx8-isp/bin
+	cp -r $(@D)/$(ISP_IMX_SUBDIR)/generated/release/bin/*.drv $(TARGET_DIR)/usr/lib/
 	cp -r $(@D)/$(ISP_IMX_SUBDIR)/generated/release/lib/*.so* $(TARGET_DIR)/usr/lib/
 	cp -r $(@D)/dewarp/dewarp_config $(TARGET_DIR)/usr/share/imx8-isp/bin
 	cp -r $(@D)/mediacontrol/case/ $(TARGET_DIR)/usr/share/imx8-isp/bin

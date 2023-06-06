@@ -1,18 +1,15 @@
-From 3486bae3d51efb98ce24885394d4f44a16514c36 Mon Sep 17 00:00:00 2001
-From: Chris Dimich <chris.dimich@boundarydevices.com>
-Date: Wed, 14 Sep 2022 10:35:50 -0700
-Subject: [PATCH 1/1] imx/run.sh: remove bashism
+From 5b9f725261076604283913dff275c59f3fd08e76 Mon Sep 17 00:00:00 2001
+From: Gary Bisson <gary.bisson@boundarydevices.com>
+Date: Tue, 6 Jun 2023 18:16:33 +0200
+Subject: [PATCH 6/8] imx/run.sh: remove bashism
 
-- can't use '+='
-- can't use variable arrays (declare)
-
-Signed-off-by: Chris Dimich <chris.dimich@boundarydevices.com>
+Signed-off-by: Gary Bisson <gary.bisson@boundarydevices.com>
 ---
- imx/run.sh | 73 ++++++++++++++++++++++++++----------------------------
- 1 file changed, 35 insertions(+), 38 deletions(-)
+ imx/run.sh | 79 ++++++++++++++++++++++++++----------------------------
+ 1 file changed, 38 insertions(+), 41 deletions(-)
 
 diff --git a/imx/run.sh b/imx/run.sh
-index cdfb98c16..45332fa42 100755
+index 07c9814b2..18b1a51f2 100755
 --- a/imx/run.sh
 +++ b/imx/run.sh
 @@ -5,7 +5,7 @@
@@ -24,11 +21,11 @@ index cdfb98c16..45332fa42 100755
  RUN_SCRIPT_PATH=`dirname $RUN_SCRIPT`
  echo "RUN_SCRIPT=$RUN_SCRIPT"
  echo "RUN_SCRIPT_PATH=$RUN_SCRIPT_PATH"
-@@ -15,24 +15,24 @@ LOCAL_RUN="0" # search modules in /lib/modules and libraries in /usr/lib
+@@ -15,26 +15,26 @@ LOCAL_RUN="0" # search modules in /lib/modules and libraries in /usr/lib
  RUN_OPTION=""
  LOCAL_RUN="0"
  # an array with the modules to load, insertion order
--declare -a MODULES=("imx8-media-dev" "vvcam-video" "vvcam-dwe" "vvcam-isp")
+-declare -a MODULES=("imx8-media-dev" "vvcam-dwe" "vvcam-isp" "vvcam-video")
 +MODULES="imx8-media-dev vvcam-video vvcam-dwe vvcam-isp"
  
  USAGE="Usage:\n"
@@ -52,19 +49,22 @@ index cdfb98c16..45332fa42 100755
 -USAGE+="\tos08a20_1080p60         - single os08a20 camera on MIPI-CSI1, 1920x1080, 60 fps\n"
 -USAGE+="\tdual_os08a20_1080p60    - dual os08a20 cameras on MIPI-CSI1/2, 1920x1080, 60 fps\n"
 -USAGE+="\tos08a20_4k              - single os08a20 camera on MIPI-CSI1, 3840x2160, 30 fps\n"
--USAGE+="\tos08a20_1080p60hdr      - single os08a20 camera on MIPI-CSI1, 1920x1080, 60 fps, HDR configuration\n"
--USAGE+="\tdual_os08a20_1080p60hdr - dual os08a20 cameras on MIPI-CSI1/2, 1920x1080, 60 fps, HDR configuration\n"
--USAGE+="\tos08a20_4khdr           - single os08a20 camera on MIPI-CSI1, 3840x2160, 30 fps, HDR configuration\n"
+-USAGE+="\tos08a20_1080p30hdr      - single os08a20 camera on MIPI-CSI1, 1920x1080, 30 fps, HDR configuration\n"
+-USAGE+="\tdual_os08a20_1080p30hdr - dual os08a20 cameras on MIPI-CSI1/2, 1920x1080, 30 fps, HDR configuration\n"
+-USAGE+="\tos08a20_4khdr           - single os08a20 camera on MIPI-CSI1, 3840x2160, 15 fps, HDR configuration\n"
 +USAGE=$USAGE"\tos08a20_1080p60         - single os08a20 camera on MIPI-CSI1, 1920x1080, 60 fps\n"
 +USAGE=$USAGE"\tdual_os08a20_1080p60    - dual os08a20 cameras on MIPI-CSI1/2, 1920x1080, 60 fps\n"
 +USAGE=$USAGE"\tos08a20_4k              - single os08a20 camera on MIPI-CSI1, 3840x2160, 30 fps\n"
-+USAGE=$USAGE"\tos08a20_1080p60hdr      - single os08a20 camera on MIPI-CSI1, 1920x1080, 60 fps, HDR configuration\n"
-+USAGE=$USAGE"\tdual_os08a20_1080p60hdr - dual os08a20 cameras on MIPI-CSI1/2, 1920x1080, 60 fps, HDR configuration\n"
-+USAGE=$USAGE"\tos08a20_4khdr           - single os08a20 camera on MIPI-CSI1, 3840x2160, 30 fps, HDR configuration\n"
++USAGE=$USAGE"\tos08a20_1080p30hdr      - single os08a20 camera on MIPI-CSI1, 1920x1080, 30 fps, HDR configuration\n"
++USAGE=$USAGE"\tdual_os08a20_1080p30hdr - dual os08a20 cameras on MIPI-CSI1/2, 1920x1080, 30 fps, HDR configuration\n"
++USAGE=$USAGE"\tos08a20_4khdr           - single os08a20 camera on MIPI-CSI1, 3840x2160, 15 fps, HDR configuration\n"
+ 
+-USAGE+="\timx219_1080p60         - single imx219 camera on MIPI-CSI1, 1920x1080, 60 fps\n"
++USAGE=$USAGE"\timx219_1080p60         - single imx219 camera on MIPI-CSI1, 1920x1080, 60 fps\n"
  
  # parse command line arguments
  while [ "$1" != "" ]; do
-@@ -170,21 +170,18 @@ load_module () {
+@@ -181,21 +181,18 @@ load_module () {
  
  load_modules () {
  	# remove any previous instances of the modules
@@ -92,12 +92,12 @@ index cdfb98c16..45332fa42 100755
  	do
  		echo "Loading module $i ..."
  		load_module $i
-@@ -194,10 +191,10 @@ load_modules () {
+@@ -205,10 +202,10 @@ load_modules () {
  write_default_mode_files
  
  echo "Trying configuration \"$ISP_CONFIG\"..."
--MODULES_TO_REMOVE=("basler-camera-driver-vvcam" "os08a20" "ov2775" "${MODULES[@]}")
-+MODULES_TO_REMOVE="basler-camera-driver-vvcam os08a20 ov2775 ${MODULES}"
+-MODULES_TO_REMOVE=("basler-camera-driver-vvcam" "os08a20" "ov2775" "imx219" "${MODULES[@]}")
++MODULES_TO_REMOVE="basler-camera-driver-vvcam os08a20 ov2775 imx219 ${MODULES}"
  case "$ISP_CONFIG" in
  		basler_4k )
 -			MODULES=("basler-camera-driver-vvcam" "${MODULES[@]}")
@@ -105,7 +105,7 @@ index cdfb98c16..45332fa42 100755
  			RUN_OPTION="CAMERA0"
  			CAM_NAME="basler-vvcam"
  			DRV_FILE="daA3840_30mc.drv"
-@@ -206,7 +203,7 @@ case "$ISP_CONFIG" in
+@@ -217,7 +214,7 @@ case "$ISP_CONFIG" in
  			write_sensor_cfg_file "Sensor0_Entry.cfg" $CAM_NAME $DRV_FILE $MODE_FILE $MODE
  			;;
  		basler_1080p60 )
@@ -114,7 +114,7 @@ index cdfb98c16..45332fa42 100755
  			RUN_OPTION="CAMERA0"
  			CAM_NAME="basler-vvcam"
  			DRV_FILE="daA3840_30mc.drv"
-@@ -215,7 +212,7 @@ case "$ISP_CONFIG" in
+@@ -226,7 +223,7 @@ case "$ISP_CONFIG" in
  			write_sensor_cfg_file "Sensor0_Entry.cfg" $CAM_NAME $DRV_FILE $MODE_FILE $MODE
  			;;
  		dual_basler_1080p60 )
@@ -123,7 +123,7 @@ index cdfb98c16..45332fa42 100755
  			RUN_OPTION="DUAL_CAMERA"
  			CAM_NAME="basler-vvcam"
  			DRV_FILE="daA3840_30mc.drv"
-@@ -225,7 +222,7 @@ case "$ISP_CONFIG" in
+@@ -236,7 +233,7 @@ case "$ISP_CONFIG" in
  			write_sensor_cfg_file "Sensor1_Entry.cfg" $CAM_NAME $DRV_FILE $MODE_FILE $MODE
  			;;
  		basler_4khdr )
@@ -132,7 +132,7 @@ index cdfb98c16..45332fa42 100755
  			RUN_OPTION="CAMERA0"
  			CAM_NAME="basler-vvcam"
  			DRV_FILE="daA3840_30mc.drv"
-@@ -234,7 +231,7 @@ case "$ISP_CONFIG" in
+@@ -245,7 +242,7 @@ case "$ISP_CONFIG" in
  			write_sensor_cfg_file "Sensor0_Entry.cfg" $CAM_NAME $DRV_FILE $MODE_FILE $MODE
  			;;
  		basler_1080p60hdr )
@@ -141,7 +141,7 @@ index cdfb98c16..45332fa42 100755
  			RUN_OPTION="CAMERA0"
  			CAM_NAME="basler-vvcam"
  			DRV_FILE="daA3840_30mc.drv"
-@@ -243,7 +240,7 @@ case "$ISP_CONFIG" in
+@@ -254,7 +251,7 @@ case "$ISP_CONFIG" in
  			write_sensor_cfg_file "Sensor0_Entry.cfg" $CAM_NAME $DRV_FILE $MODE_FILE $MODE
  			;;
  		dual_basler_1080p60hdr )
@@ -150,7 +150,7 @@ index cdfb98c16..45332fa42 100755
  			RUN_OPTION="DUAL_CAMERA"
  			CAM_NAME="basler-vvcam"
  			DRV_FILE="daA3840_30mc.drv"
-@@ -253,7 +250,7 @@ case "$ISP_CONFIG" in
+@@ -264,7 +261,7 @@ case "$ISP_CONFIG" in
  			write_sensor_cfg_file "Sensor1_Entry.cfg" $CAM_NAME $DRV_FILE $MODE_FILE $MODE
  			;;
  		 os08a20_4k )
@@ -159,7 +159,7 @@ index cdfb98c16..45332fa42 100755
  			RUN_OPTION="CAMERA0"
  			CAM_NAME="os08a20"
  			DRV_FILE="os08a20.drv"
-@@ -262,7 +259,7 @@ case "$ISP_CONFIG" in
+@@ -273,7 +270,7 @@ case "$ISP_CONFIG" in
  			write_sensor_cfg_file "Sensor0_Entry.cfg" $CAM_NAME $DRV_FILE $MODE_FILE $MODE
  			;;
  		 os08a20_4khdr )
@@ -168,7 +168,7 @@ index cdfb98c16..45332fa42 100755
                           RUN_OPTION="DUAL_CAMERA"
                           CAM_NAME="os08a20"
                           DRV_FILE="os08a20.drv"
-@@ -271,7 +268,7 @@ case "$ISP_CONFIG" in
+@@ -282,7 +279,7 @@ case "$ISP_CONFIG" in
                           write_sensor_cfg_file "Sensor0_Entry.cfg" $CAM_NAME $DRV_FILE $MODE_FILE $MODE
  			 ;;
  		 os08a20_1080p60 )
@@ -177,7 +177,7 @@ index cdfb98c16..45332fa42 100755
                           RUN_OPTION="CAMERA0"
                           CAM_NAME="os08a20"
                           DRV_FILE="os08a20.drv"
-@@ -280,7 +277,7 @@ case "$ISP_CONFIG" in
+@@ -291,7 +288,7 @@ case "$ISP_CONFIG" in
                           write_sensor_cfg_file "Sensor0_Entry.cfg" $CAM_NAME $DRV_FILE $MODE_FILE $MODE
                           ;;
                   dual_os08a20_1080p60 )
@@ -186,24 +186,42 @@ index cdfb98c16..45332fa42 100755
                           RUN_OPTION="DUAL_CAMERA"
                           CAM_NAME="os08a20"
                           DRV_FILE="os08a20.drv"
-@@ -290,7 +287,7 @@ case "$ISP_CONFIG" in
+@@ -301,7 +298,7 @@ case "$ISP_CONFIG" in
                           write_sensor_cfg_file "Sensor1_Entry.cfg" $CAM_NAME $DRV_FILE $MODE_FILE $MODE
                           ;;
-                  os08a20_1080p60hdr )
+ 		 os08a20_1080p30hdr )
 -			 MODULES=("os08a20" "${MODULES[@]}")
 +			 MODULES="os08a20 ${MODULES}"
                           RUN_OPTION="CAMERA0"
                           CAM_NAME="os08a20"
                           DRV_FILE="os08a20.drv"
-@@ -299,7 +296,7 @@ case "$ISP_CONFIG" in
+@@ -310,7 +307,7 @@ case "$ISP_CONFIG" in
                           write_sensor_cfg_file "Sensor0_Entry.cfg" $CAM_NAME $DRV_FILE $MODE_FILE $MODE
                           ;;
- 		 dual_os08a20_1080p60hdr )
+ 		 dual_os08a20_1080p30hdr )
 -			 MODULES=("os08a20" "${MODULES[@]}")
 +			 MODULES="os08a20 ${MODULES}"
                           RUN_OPTION="DUAL_CAMERA"
                           CAM_NAME="os08a20"
                           DRV_FILE="os08a20.drv"
+@@ -320,7 +317,7 @@ case "$ISP_CONFIG" in
+                          write_sensor_cfg_file "Sensor1_Entry.cfg" $CAM_NAME $DRV_FILE $MODE_FILE $MODE
+                          ;;
+                  imx219_1080p60 )
+-                         MODULES=("imx219" "${MODULES[@]}")
++                         MODULES="imx219 ${MODULES}"
+                          RUN_OPTION="CAMERA0"
+                          CAM_NAME="imx219"
+                          DRV_FILE="imx219.drv"
+@@ -329,7 +326,7 @@ case "$ISP_CONFIG" in
+                          write_sensor_cfg_file "Sensor0_Entry.cfg" $CAM_NAME $DRV_FILE $MODE_FILE $MODE
+                          ;;
+                  dual_imx219_1080p60 )
+-                         MODULES=("imx219" "${MODULES[@]}")
++                         MODULES="imx219 ${MODULES}"
+                          RUN_OPTION="DUAL_CAMERA"
+                          CAM_NAME="imx219"
+                          DRV_FILE="imx219.drv"
 -- 
-2.34.1
+2.39.2
 
