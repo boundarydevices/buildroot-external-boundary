@@ -43,7 +43,7 @@ endef
 
 define ISP_IMX_INSTALL_TARGET_CMDS
 	mkdir -p $(TARGET_DIR)/usr/share/imx8-isp/bin
-	cp -r $(@D)/$(ISP_IMX_SUBDIR)/generated/release/bin/*2775* $(TARGET_DIR)/usr/share/imx8-isp/bin
+	cp -r $(@D)/$(ISP_IMX_SUBDIR)/generated/release/bin/*08a20* $(TARGET_DIR)/usr/share/imx8-isp/bin
 	cp -r $(@D)/$(ISP_IMX_SUBDIR)/generated/release/bin/isp_media_server $(TARGET_DIR)/usr/share/imx8-isp/bin
 	cp -r $(@D)/$(ISP_IMX_SUBDIR)/generated/release/bin/*_test $(TARGET_DIR)/usr/share/imx8-isp/bin
 	cp -r $(@D)/$(ISP_IMX_SUBDIR)/generated/release/bin/vvext $(TARGET_DIR)/usr/share/imx8-isp/bin
