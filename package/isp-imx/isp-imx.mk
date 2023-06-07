@@ -7,7 +7,7 @@
 ISP_IMX_VERSION = 4.2.2.20.0
 ISP_IMX_SITE = $(FREESCALE_IMX_SITE)
 ISP_IMX_SOURCE = isp-imx-$(ISP_IMX_VERSION).bin
-ISP_IMX_DEPENDENCIES = linux linux-imx-headers python3 libdrm tinyxml2
+ISP_IMX_DEPENDENCIES = linux linux-imx-headers python3 libdrm tinyxml2 boost
 ISP_IMX_LICENSE = NXP Semiconductor Software License Agreement
 ISP_IMX_LICENSE_FILES = EULA COPYING
 ISP_IMX_REDISTRIBUTE = NO
