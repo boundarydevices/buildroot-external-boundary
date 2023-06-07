@@ -63,7 +63,7 @@ BR2_LINUX_KERNEL_CUSTOM_TARBALL_LOCATION="https://github.com/boundarydevices/lin
 BR2_LINUX_KERNEL_DEFCONFIG="boundary"
 BR2_LINUX_KERNEL_DTS_SUPPORT=y
 BR2_LINUX_KERNEL_INSTALL_TARGET=y
-BR2_LINUX_KERNEL_INTREE_DTS_NAME="freescale/imx8mp-nitrogen8mp freescale/imx8mp-nitrogen8mp-m4 freescale/imx8mp-nitrogen8mp-enc freescale/imx8mp-nitrogen8mp-enc-tc358743"
+BR2_LINUX_KERNEL_INTREE_DTS_NAME="freescale/imx8mp-nitrogen8mp freescale/imx8mp-nitrogen8mp-m4 freescale/imx8mp-nitrogen8mp-enc freescale/imx8mp-nitrogen8mp-enc-tc358743 freescale/imx8mp-nitrogen_smarc"
 BR2_LINUX_KERNEL_NEEDS_HOST_OPENSSL=y
 
 # NXP packages
@@ -78,6 +78,7 @@ BR2_PACKAGE_IMX_VPU_HANTRO_DAEMON=y
 BR2_PACKAGE_IMX_GPU_G2D=y
 
 # WiFi/BT packages
+BR2_PACKAGE_CYPRESS_FIRMWARE=y
 BR2_PACKAGE_QCA_FIRMWARE=y
 BR2_PACKAGE_QCACLD_MODULE=y
 
