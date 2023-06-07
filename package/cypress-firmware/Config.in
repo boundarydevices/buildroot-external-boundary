@@ -1,0 +1,15 @@
+menuconfig BR2_PACKAGE_CYPRESS_FIRMWARE
+	bool "cypress-firmware"
+	help
+	  This modules adds firmware files for the Cypress-based
+	  Wi-Fi/BT modules such as the LWB5+
+
+if BR2_PACKAGE_CYPRESS_FIRMWARE
+choice
+	prompt "WiFi/BT module"
+
+config BR2_PACKAGE_CYPRESS_FIRMWARE_LWB5P_SDIO_SA
+	bool "lwb5+ sdio single antenna"
+
+endchoice
+endif
