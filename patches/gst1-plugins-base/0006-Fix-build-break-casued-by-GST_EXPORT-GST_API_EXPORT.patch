@@ -1,0 +1,142 @@
+From 01ac178eb125a8f3fce44bb13c067fd68914a9d1 Mon Sep 17 00:00:00 2001
+From: Haihua Hu <jared.hu@nxp.com>
+Date: Mon, 3 Jun 2019 15:36:36 +0800
+Subject: [PATCH 1/1] Fix build break casued by GST_EXPORT->GST_API_EXPORT
+
+On 1.16, GST_EXPORT has been discarded. GST_VIDEO_API and
+GST_ALLOCATORS_API declaration has change to GST_API_EXPORT.
+We should use the right type prelude.
+
+upstream status: imx specific
+
+(cherry picked from commit fb47660fa0957778d8dc6714c88bee9200412967)
+---
+ gst-libs/gst/allocators/gstallocatorphymem.h | 9 +++++----
+ gst-libs/gst/allocators/gstdmabufmeta.h      | 9 +++++----
+ gst-libs/gst/allocators/gstionmemory.h       | 1 +
+ gst-libs/gst/allocators/gstphymemmeta.c      | 4 ++++
+ gst-libs/gst/allocators/gstphymemmeta.h      | 5 +++--
+ 5 files changed, 18 insertions(+), 10 deletions(-)
+
+diff --git a/gst-libs/gst/allocators/gstallocatorphymem.h b/gst-libs/gst/allocators/gstallocatorphymem.h
+index cba6f0497..0ced166fa 100755
+--- a/gst-libs/gst/allocators/gstallocatorphymem.h
++++ b/gst-libs/gst/allocators/gstallocatorphymem.h
+@@ -22,6 +22,7 @@
+ 
+ #include <gst/gst.h>
+ #include <gst/gstallocator.h>
++#include <gst/allocators/allocators-prelude.h>
+ 
+ #define PAGE_ALIGN(x) (((x) + 4095) & ~4095)
+ 
+@@ -56,16 +57,16 @@ struct _GstAllocatorPhyMemClass {
+                       PhyMemBlock *src_mem, guint offset, guint size);
+ };
+ 
+-GST_EXPORT
++GST_ALLOCATORS_API
+ GType gst_allocator_phymem_get_type (void);
+ 
+-GST_EXPORT
++GST_ALLOCATORS_API
+ gboolean gst_buffer_is_phymem (GstBuffer *buffer);
+ 
+-GST_EXPORT
++GST_ALLOCATORS_API
+ PhyMemBlock *gst_buffer_query_phymem_block (GstBuffer *buffer);
+ 
+-GST_EXPORT
++GST_ALLOCATORS_API
+ PhyMemBlock *gst_memory_query_phymem_block (GstMemory *mem);
+ 
+ #endif
+diff --git a/gst-libs/gst/allocators/gstdmabufmeta.h b/gst-libs/gst/allocators/gstdmabufmeta.h
+index 1af80fd15..c9c0899d6 100644
+--- a/gst-libs/gst/allocators/gstdmabufmeta.h
++++ b/gst-libs/gst/allocators/gstdmabufmeta.h
+@@ -24,6 +24,7 @@
+ #include <gst/gstmeta.h>
+ #include <gst/gstquery.h>
+ #include <gst/gstvalue.h>
++#include <gst/allocators/allocators-prelude.h>
+ 
+ G_BEGIN_DECLS
+ 
+@@ -43,17 +44,17 @@ struct _GstDmabufMeta
+   guint64 drm_modifier;
+ };
+ 
+-GST_EXPORT
++GST_ALLOCATORS_API
+ GType gst_dmabuf_meta_api_get_type (void);
+-GST_EXPORT
++GST_ALLOCATORS_API
+ const GstMetaInfo *gst_dmabuf_meta_get_info (void);
+ 
+ #define gst_buffer_get_dmabuf_meta(b) ((GstDmabufMeta*)gst_buffer_get_meta((b),GST_DMABUF_META_API_TYPE))
+ 
+-GST_EXPORT
++GST_ALLOCATORS_API
+ GstDmabufMeta * gst_buffer_add_dmabuf_meta (GstBuffer * buffer, guint64 drm_modifier);
+ 
+-GST_EXPORT
++GST_ALLOCATORS_API
+ void gst_query_add_allocation_dmabuf_meta (GstQuery * query, guint64 drm_modifier);
+ 
+ G_END_DECLS
+diff --git a/gst-libs/gst/allocators/gstionmemory.h b/gst-libs/gst/allocators/gstionmemory.h
+index b029e14c2..272db409c 100644
+--- a/gst-libs/gst/allocators/gstionmemory.h
++++ b/gst-libs/gst/allocators/gstionmemory.h
+@@ -23,6 +23,7 @@
+ 
+ #include <gst/gst.h>
+ #include <gst/allocators/gstdmabuf.h>
++#include <gst/allocators/allocators-prelude.h>
+ 
+ G_BEGIN_DECLS
+ 
+diff --git a/gst-libs/gst/allocators/gstphymemmeta.c b/gst-libs/gst/allocators/gstphymemmeta.c
+index a22ec9a57..10c30a6fc 100644
+--- a/gst-libs/gst/allocators/gstphymemmeta.c
++++ b/gst-libs/gst/allocators/gstphymemmeta.c
+@@ -17,6 +17,10 @@
+  * Boston, MA 02111-1307, USA.
+  */
+ 
++#ifdef HAVE_CONFIG_H
++#include "config.h"
++#endif
++
+ #include "gstphymemmeta.h"
+ 
+ GST_DEBUG_CATEGORY_STATIC (phy_mem_meta_debug);
+diff --git a/gst-libs/gst/allocators/gstphymemmeta.h b/gst-libs/gst/allocators/gstphymemmeta.h
+index cb7539097..54f80ae48 100644
+--- a/gst-libs/gst/allocators/gstphymemmeta.h
++++ b/gst-libs/gst/allocators/gstphymemmeta.h
+@@ -23,6 +23,7 @@
+ #include <gst/gst.h>
+ #include <gst/video/video.h>
+ #include <gst/video/gstvideometa.h>
++#include <gst/allocators/allocators-prelude.h>
+ #include "gstphymemmeta.h"
+ 
+ G_BEGIN_DECLS
+@@ -45,10 +46,10 @@ struct _GstPhyMemMeta
+   guint rfc_chroma_offset;
+ };
+ 
+-GST_EXPORT
++GST_ALLOCATORS_API
+ GType gst_phy_mem_meta_api_get_type(void);
+ 
+-GST_EXPORT
++GST_ALLOCATORS_API
+ GstMetaInfo const * gst_phy_mem_meta_get_info(void);
+ 
+ G_END_DECLS
+-- 
+2.34.1
+

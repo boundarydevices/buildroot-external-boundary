@@ -1,7 +1,7 @@
-From 753dfcacc18534fbed2a274442a726c0f5efd87b Mon Sep 17 00:00:00 2001
+From 09f2477706e47d022fc3c6adcdf79b1eb6634df9 Mon Sep 17 00:00:00 2001
 From: Haihua Hu <jared.hu@nxp.com>
 Date: Thu, 29 Mar 2018 11:18:56 +0800
-Subject: [PATCH 1/8] MMFMWK-7954 waylandsink: change to using GCond to avoid
+Subject: [PATCH] MMFMWK-7954 waylandsink: change to using GCond to avoid
  dropping video buffer
 
 upstream status: imx specific
@@ -11,57 +11,58 @@ Conflicts:
 	ext/wayland/gstwaylandsink.c
 (cherry picked from commit a70b222d23a7b74ef92919d931d0bf0df26c3c0e)
 ---
- ext/wayland/gstwaylandsink.c | 10 +++++-----
+ ext/wayland/gstwaylandsink.c | 11 +++++------
  ext/wayland/gstwaylandsink.h |  1 +
- 2 files changed, 6 insertions(+), 5 deletions(-)
+ 2 files changed, 6 insertions(+), 6 deletions(-)
 
 diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
-index 0761304ce..45c16809a 100644
+index 2f116bf5a..878ddc396 100644
 --- a/ext/wayland/gstwaylandsink.c
 +++ b/ext/wayland/gstwaylandsink.c
-@@ -220,6 +220,7 @@ gst_wayland_sink_init (GstWaylandSink * sink)
+@@ -193,6 +193,7 @@ gst_wayland_sink_init (GstWaylandSink * self)
  {
-   g_mutex_init (&sink->display_lock);
-   g_mutex_init (&sink->render_lock);
-+  g_cond_init (&sink->redraw_wait);
+   g_mutex_init (&self->display_lock);
+   g_mutex_init (&self->render_lock);
++  g_cond_init (&self->redraw_wait);
  }
  
  static void
-@@ -300,6 +301,7 @@ gst_wayland_sink_finalize (GObject * object)
+@@ -319,6 +320,7 @@ gst_wayland_sink_finalize (GObject * object)
  
-   g_mutex_clear (&sink->display_lock);
-   g_mutex_clear (&sink->render_lock);
-+  g_cond_clear (&sink->redraw_wait);
+   g_mutex_clear (&self->display_lock);
+   g_mutex_clear (&self->render_lock);
++  g_cond_clear (&self->redraw_wait);
  
    G_OBJECT_CLASS (parent_class)->finalize (object);
  }
-@@ -644,6 +646,7 @@ frame_redraw_callback (void *data, struct wl_callback *callback, uint32_t time)
+@@ -687,6 +689,7 @@ frame_redraw_callback (void *data, struct wl_callback *callback, uint32_t time)
  
-   g_mutex_lock (&sink->render_lock);
-   sink->redraw_pending = FALSE;
-+  g_cond_signal (&sink->redraw_wait);
+   g_mutex_lock (&self->render_lock);
+   self->redraw_pending = FALSE;
++  g_cond_signal (&self->redraw_wait);
  
-   if (sink->callback) {
+   if (self->callback) {
      wl_callback_destroy (callback);
-@@ -724,11 +727,8 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+@@ -769,12 +772,8 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
      }
    }
  
 -  /* drop buffers until we get a frame callback */
--  if (sink->redraw_pending) {
--    GST_LOG_OBJECT (sink, "buffer %p dropped (redraw pending)", buffer);
+-  if (self->redraw_pending) {
+-    GST_LOG_OBJECT (self, "buffer %" GST_PTR_FORMAT " dropped (redraw pending)",
+-        buffer);
 -    goto done;
 -  }
-+  while (sink->redraw_pending)
-+    g_cond_wait (&sink->redraw_wait, &sink->render_lock);
++  while (self->redraw_pending)
++    g_cond_wait (&self->redraw_wait, &self->render_lock);
  
    /* make sure that the application has called set_render_rectangle() */
-   if (G_UNLIKELY (sink->window->render_rectangle.w == 0))
+   if (G_UNLIKELY (gst_wl_window_get_render_rectangle (self->window)->w == 0))
 diff --git a/ext/wayland/gstwaylandsink.h b/ext/wayland/gstwaylandsink.h
-index 7aabb6ff0..d0894ce77 100644
+index 3243d8cd8..4847219f6 100644
 --- a/ext/wayland/gstwaylandsink.h
 +++ b/ext/wayland/gstwaylandsink.h
-@@ -65,6 +65,7 @@ struct _GstWaylandSink
+@@ -60,6 +60,7 @@ struct _GstWaylandSink
    gchar *display_name;
  
    gboolean redraw_pending;
@@ -69,6 +70,3 @@ index 7aabb6ff0..d0894ce77 100644
    GMutex render_lock;
    GstBuffer *last_buffer;
  
--- 
-2.34.1
-

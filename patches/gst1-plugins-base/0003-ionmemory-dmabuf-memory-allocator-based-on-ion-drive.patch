@@ -1,0 +1,497 @@
+From 92ac4e74fc04236774249342042b5ff98b0f6d90 Mon Sep 17 00:00:00 2001
+From: Lyon Wang <lyon.wang@nxp.com>
+Date: Mon, 2 Apr 2018 15:51:48 +0800
+Subject: [PATCH 1/1] ionmemory: dmabuf memory allocator based on ion driver.
+
+merge below 4 commits from imx-1.16.x
+59ccb9183 Fix build break for ion on 4.14 kernel [YOCIMX-2861]
+6d020d790 MMFMWK-8113 [ion] Enable ion allocator based on Kernel 4.14
+ad0160d35 ionmemory: support get phys memory
+1ac453e86 ionmemory: dmabuf memory allocator based on ion driver.
+
+Conflicts:
+	gst-libs/gst/allocators/meson.build
+(cherry picked from commit 18612bd721030d0750dc2252bd57ef66cfa0a9c2)
+---
+ gst-libs/gst/allocators/gstionmemory.c | 361 +++++++++++++++++++++++++
+ gst-libs/gst/allocators/gstionmemory.h |  68 +++++
+ gst-libs/gst/allocators/meson.build    |  15 +-
+ 3 files changed, 443 insertions(+), 1 deletion(-)
+ create mode 100644 gst-libs/gst/allocators/gstionmemory.c
+ create mode 100644 gst-libs/gst/allocators/gstionmemory.h
+
+diff --git a/gst-libs/gst/allocators/gstionmemory.c b/gst-libs/gst/allocators/gstionmemory.c
+new file mode 100644
+index 000000000..a4572abdd
+--- /dev/null
++++ b/gst-libs/gst/allocators/gstionmemory.c
+@@ -0,0 +1,361 @@
++/*
++ * Copyright (c) 2016, Freescale Semiconductor, Inc. All rights reserved.
++ * Copyright 2017 NXP
++ *
++ * This library is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Library General Public
++ * License as published by the Free Software Foundation; either
++ * version 2 of the License, or (at your option) any later version.
++ *
++ * This library is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * Library General Public License for more details.
++ *
++ * You should have received a copy of the GNU Library General Public
++ * License along with this library; if not, write to the
++ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
++ * Boston, MA 02111-1307, USA.
++ */
++
++#ifdef HAVE_CONFIG_H
++#include "config.h"
++#endif
++
++#include <errno.h>
++#include <fcntl.h>
++#include <stdio.h>
++#include <string.h>
++#include <unistd.h>
++#include <sys/ioctl.h>
++#include <sys/mman.h>
++#include <sys/types.h>
++#include <linux/ion.h>
++#include <linux/dma-buf.h>
++#include <linux/version.h>
++
++
++#include <gst/allocators/gstdmabuf.h>
++#include "gstphysmemory.h"
++#include "gstionmemory.h"
++
++GST_DEBUG_CATEGORY_STATIC (ion_allocator_debug);
++#define GST_CAT_DEFAULT ion_allocator_debug
++
++#define gst_ion_allocator_parent_class parent_class
++
++#define DEFAULT_HEAP_ID  0
++#define DEFAULT_FLAG     0
++
++enum
++{
++  PROP_0,
++  PROP_HEAP_ID,
++  PROP_FLAG,
++  PROP_LAST
++};
++
++static guintptr
++gst_ion_allocator_get_phys_addr (GstPhysMemoryAllocator * allocator,
++    GstMemory * mem)
++{
++  GstIONAllocator *self = GST_ION_ALLOCATOR (allocator);
++  gint ret, fd;
++
++  if (self->fd < 0 || !mem) {
++    GST_ERROR ("ion get phys param wrong");
++    return 0;
++  }
++
++  if (!gst_is_dmabuf_memory (mem)) {
++    GST_ERROR ("isn't dmabuf memory");
++    return 0;
++  }
++
++  fd = gst_dmabuf_memory_get_fd (mem);
++  if (fd < 0) {
++    GST_ERROR ("dmabuf memory get fd failed");
++    return 0;
++  }
++
++  GST_DEBUG ("ion DMA FD: %d", fd);
++
++#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 14, 0)
++  struct ion_phys_dma_data data = {
++    .phys = 0,
++    .size = 0,
++    .dmafd = fd,
++  };
++  struct ion_custom_data custom = {
++    .cmd = ION_IOC_PHYS_DMA,
++    .arg = (unsigned long) &data,
++  };
++
++  ret = ioctl (self->fd, ION_IOC_CUSTOM, &custom);
++  if (ret < 0)
++    return 0;
++
++  return data.phys;
++#else
++  struct dma_buf_phys dma_phys;
++
++  ret = ioctl (fd, DMA_BUF_IOCTL_PHYS, &dma_phys);
++  if (ret < 0)
++    return 0;
++
++  return dma_phys.phys;
++#endif
++}
++
++static void
++gst_ion_allocator_iface_init (gpointer g_iface)
++{
++  GstPhysMemoryAllocatorInterface *iface = g_iface;
++  iface->get_phys_addr = gst_ion_allocator_get_phys_addr;
++}
++
++G_DEFINE_TYPE_WITH_CODE (GstIONAllocator, gst_ion_allocator,
++    GST_TYPE_DMABUF_ALLOCATOR,
++    G_IMPLEMENT_INTERFACE (GST_TYPE_PHYS_MEMORY_ALLOCATOR,
++        gst_ion_allocator_iface_init));
++
++static gint
++gst_ion_ioctl (gint fd, gint req, void *arg)
++{
++  gint ret = ioctl (fd, req, arg);
++  if (ret < 0) {
++    GST_ERROR ("ioctl %x failed with code %d: %s\n", req, ret,
++        strerror (errno));
++  }
++  return ret;
++}
++
++static void
++gst_ion_mem_init (void)
++{
++  GstAllocator *allocator = g_object_new (gst_ion_allocator_get_type (), NULL);
++  GstIONAllocator *self = GST_ION_ALLOCATOR (allocator);
++  gint fd;
++
++  fd = open ("/dev/ion", O_RDWR);
++  if (fd < 0) {
++    GST_WARNING ("Could not open ion driver");
++    g_object_unref (self);
++    return;
++  }
++
++  self->fd = fd;
++
++  gst_allocator_register (GST_ALLOCATOR_ION, allocator);
++}
++
++GstAllocator *
++gst_ion_allocator_obtain (void)
++{
++  static GOnce ion_allocator_once = G_ONCE_INIT;
++  GstAllocator *allocator;
++
++  g_once (&ion_allocator_once, (GThreadFunc) gst_ion_mem_init, NULL);
++
++  allocator = gst_allocator_find (GST_ALLOCATOR_ION);
++  if (allocator == NULL)
++    GST_WARNING ("No allocator named %s found", GST_ALLOCATOR_ION);
++
++  return allocator;
++}
++
++static GstMemory *
++gst_ion_alloc_alloc (GstAllocator * allocator, gsize size,
++    GstAllocationParams * params)
++{
++  GstIONAllocator *self = GST_ION_ALLOCATOR (allocator);
++#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 14, 0)
++  struct ion_allocation_data allocation_data = { 0 };
++  struct ion_fd_data fd_data = { 0 };
++  struct ion_handle_data handle_data = { 0 };
++  ion_user_handle_t ion_handle;
++  GstMemory *mem;
++  gsize ion_size;
++  gint dma_fd = -1;
++  gint ret;
++
++  if (self->fd < 0) {
++    GST_ERROR ("ion allocate param wrong");
++    return NULL;
++  }
++
++  ion_size = size + params->prefix + params->padding;
++  allocation_data.len = ion_size;
++  allocation_data.align = params->align;
++  allocation_data.heap_id_mask = 1 << self->heap_id;
++  allocation_data.flags = self->flags;
++  if (gst_ion_ioctl (self->fd, ION_IOC_ALLOC, &allocation_data) < 0) {
++    GST_ERROR ("ion allocate failed.");
++    return NULL;
++  }
++  ion_handle = allocation_data.handle;
++
++  fd_data.handle = ion_handle;
++  ret = gst_ion_ioctl (self->fd, ION_IOC_MAP, &fd_data);
++  if (ret < 0 || fd_data.fd < 0) {
++    GST_ERROR ("map ioctl failed or returned negative fd");
++    goto bail;
++  }
++  dma_fd = fd_data.fd;
++
++  handle_data.handle = ion_handle;
++  gst_ion_ioctl (self->fd, ION_IOC_FREE, &handle_data);
++
++#else
++  gint heapCnt = 0;
++  gint heap_mask = 0;
++  GstMemory *mem;
++  gsize ion_size;
++  gint dma_fd = -1;
++  gint ret;
++
++  struct ion_heap_query query;
++  memset (&query, 0, sizeof (query));
++  ret = gst_ion_ioctl (self->fd, ION_IOC_HEAP_QUERY, &query);
++  if (ret != 0 || query.cnt == 0) {
++    GST_ERROR ("can't query heap count");
++    return NULL;
++  }
++  heapCnt = query.cnt;
++
++  struct ion_heap_data ihd[heapCnt];
++  memset (&ihd, 0, sizeof (ihd));
++  query.cnt = heapCnt;
++  query.heaps = &ihd;
++  ret = gst_ion_ioctl (self->fd, ION_IOC_HEAP_QUERY, &query);
++  if (ret != 0) {
++    GST_ERROR ("can't get ion heaps");
++    return NULL;
++  }
++
++  for (gint i = 0; i < heapCnt; i++) {
++    if (ihd[i].type == ION_HEAP_TYPE_DMA) {
++      heap_mask |= 1 << ihd[i].heap_id;
++    }
++  }
++
++  ion_size = size + params->prefix + params->padding;
++  struct ion_allocation_data data = {
++    .len = ion_size,
++    .heap_id_mask = heap_mask,
++    .flags = self->flags,
++  };
++  ret = gst_ion_ioctl (self->fd, ION_IOC_ALLOC, &data);
++  if (ret < 0) {
++    GST_ERROR ("ion allocate failed.");
++    return NULL;
++  }
++  dma_fd = data.fd;
++#endif
++
++  mem = gst_dmabuf_allocator_alloc (allocator, dma_fd, size);
++
++  GST_DEBUG ("ion allocated size: %" G_GSIZE_FORMAT "DMA FD: %d", ion_size,
++      dma_fd);
++
++  return mem;
++
++bail:
++  if (dma_fd >= 0) {
++    close (dma_fd);
++  }
++#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 14, 0)
++  handle_data.handle = ion_handle;
++  gst_ion_ioctl (self->fd, ION_IOC_FREE, &handle_data);
++#endif
++
++  return NULL;
++}
++
++static void
++gst_ion_allocator_dispose (GObject * object)
++{
++  GstIONAllocator *self = GST_ION_ALLOCATOR (object);
++
++  if (self->fd > 0) {
++    close (self->fd);
++    self->fd = -1;
++  }
++
++  G_OBJECT_CLASS (parent_class)->dispose (object);
++}
++
++static void
++gst_ion_allocator_set_property (GObject * object, guint prop_id,
++    const GValue * value, GParamSpec * pspec)
++{
++  GstIONAllocator *self = GST_ION_ALLOCATOR (object);
++
++  switch (prop_id) {
++    case PROP_HEAP_ID:
++      self->heap_id = g_value_get_uint (value);
++      break;
++    case PROP_FLAG:
++      self->flags = g_value_get_uint (value);
++      break;
++    default:
++      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
++      break;
++  }
++}
++
++static void
++gst_ion_allocator_get_property (GObject * object, guint prop_id, GValue * value,
++    GParamSpec * pspec)
++{
++  GstIONAllocator *self = GST_ION_ALLOCATOR (object);
++
++  switch (prop_id) {
++    case PROP_HEAP_ID:
++      g_value_set_uint (value, self->heap_id);
++      break;
++    case PROP_FLAG:
++      g_value_set_uint (value, self->flags);
++      break;
++    default:
++      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
++      break;
++  }
++}
++
++static void
++gst_ion_allocator_class_init (GstIONAllocatorClass * klass)
++{
++  GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
++  GstAllocatorClass *allocator_class = GST_ALLOCATOR_CLASS (klass);
++
++  gobject_class->dispose = GST_DEBUG_FUNCPTR (gst_ion_allocator_dispose);
++  gobject_class->set_property = gst_ion_allocator_set_property;
++  gobject_class->get_property = gst_ion_allocator_get_property;
++
++  g_object_class_install_property (gobject_class, PROP_HEAP_ID,
++      g_param_spec_uint ("heap-id", "Heap ID",
++          "ION heap id", 0, G_MAXUINT32, DEFAULT_HEAP_ID,
++          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
++
++  g_object_class_install_property (gobject_class, PROP_FLAG,
++      g_param_spec_uint ("flags", "Flags",
++          "ION memory flags", 0, G_MAXUINT32, DEFAULT_FLAG,
++          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
++
++  allocator_class->alloc = GST_DEBUG_FUNCPTR (gst_ion_alloc_alloc);
++
++  GST_DEBUG_CATEGORY_INIT (ion_allocator_debug, "ionmemory", 0,
++      "DMA FD memory allocator based on ion");
++}
++
++static void
++gst_ion_allocator_init (GstIONAllocator * self)
++{
++  GstAllocator *allocator = GST_ALLOCATOR (self);
++
++  allocator->mem_type = GST_ALLOCATOR_ION;
++
++  self->heap_id = DEFAULT_HEAP_ID;
++  self->flags = DEFAULT_FLAG;
++}
+diff --git a/gst-libs/gst/allocators/gstionmemory.h b/gst-libs/gst/allocators/gstionmemory.h
+new file mode 100644
+index 000000000..b029e14c2
+--- /dev/null
++++ b/gst-libs/gst/allocators/gstionmemory.h
+@@ -0,0 +1,68 @@
++/*
++ * Copyright (c) 2016, Freescale Semiconductor, Inc. All rights reserved.
++ * Copyright 2017 NXP
++ *
++ * This library is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Library General Public
++ * License as published by the Free Software Foundation; either
++ * version 2 of the License, or (at your option) any later version.
++ *
++ * This library is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * Library General Public License for more details.
++ *
++ * You should have received a copy of the GNU Library General Public
++ * License along with this library; if not, write to the
++ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
++ * Boston, MA 02111-1307, USA.
++ */
++
++#ifndef __GST_IONMEMORY_H__
++#define __GST_IONMEMORY_H__
++
++#include <gst/gst.h>
++#include <gst/allocators/gstdmabuf.h>
++
++G_BEGIN_DECLS
++
++typedef struct _GstIONAllocator GstIONAllocator;
++typedef struct _GstIONAllocatorClass GstIONAllocatorClass;
++typedef struct _GstIONMemory GstIONMemory;
++
++#define GST_ALLOCATOR_ION "ionmem"
++
++#define GST_TYPE_ION_ALLOCATOR gst_ion_allocator_get_type ()
++#define GST_IS_ION_ALLOCATOR(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), \
++    GST_TYPE_ION_ALLOCATOR))
++#define GST_ION_ALLOCATOR(obj) \
++  (G_TYPE_CHECK_INSTANCE_CAST((obj), GST_TYPE_ION_ALLOCATOR, GstIONAllocator))
++#define GST_ION_ALLOCATOR_CLASS(klass) \
++  (G_TYPE_CHECK_CLASS_CAST((klass), GST_TYPE_ION_ALLOCATOR, GstIONAllocatorClass))
++#define GST_ION_ALLOCATOR_CAST(obj) ((GstIONAllocator *)(obj))
++
++#define GST_ION_MEMORY_QUARK gst_ion_memory_quark ()
++
++struct _GstIONAllocator
++{
++  GstDmaBufAllocator parent;
++
++  gint fd;
++  guint heap_id;
++  guint flags;
++};
++
++struct _GstIONAllocatorClass
++{
++  GstDmaBufAllocatorClass parent;
++};
++
++GST_ALLOCATORS_API
++GType gst_ion_allocator_get_type (void);
++
++GST_ALLOCATORS_API
++GstAllocator* gst_ion_allocator_obtain (void);
++
++G_END_DECLS
++
++#endif /* __GST_IONMEMORY_H__ */
+diff --git a/gst-libs/gst/allocators/meson.build b/gst-libs/gst/allocators/meson.build
+index ed2fa280c..f8a7d9664 100644
+--- a/gst-libs/gst/allocators/meson.build
++++ b/gst-libs/gst/allocators/meson.build
+@@ -6,12 +6,25 @@ gst_allocators_headers = files([
+   'gstdmabuf.h',
+   'gstdmabufmeta.h',
+ ])
++
++gst_ionallocator_headers = []
++gst_ionallocator_sources = []
++
++if cc.has_header('linux/ion.h')
++  gst_ionallocator_headers += [
++    'gstionmemory.h',
++  ]
++  gst_ionallocator_sources += [
++    'gstionmemory.c',
++  ]
++endif
++
+ install_headers(gst_allocators_headers, subdir : 'gstreamer-1.0/gst/allocators/')
+ 
+ gst_allocators_sources = files([ 'gstdmabuf.c', 'gstfdmemory.c', 'gstphysmemory.c', 'gstdmabufmeta.c'])
+ 
+ gstallocators = library('gstallocators-@0@'.format(api_version),
+-  gst_allocators_sources,
++  gst_allocators_sources, gst_ionallocator_sources,
+   c_args : gst_plugins_base_args + ['-DBUILDING_GST_ALLOCATORS', '-DG_LOG_DOMAIN="GStreamer-Allocators"'],
+   include_directories: [configinc, libsinc],
+   version : libversion,
+-- 
+2.34.1
+
