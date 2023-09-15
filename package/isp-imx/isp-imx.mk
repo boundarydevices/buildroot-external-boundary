@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-ISP_IMX_VERSION = 4.2.2.20.0
+ISP_IMX_VERSION = 4.2.2.22.0
 ISP_IMX_SITE = $(FREESCALE_IMX_SITE)
 ISP_IMX_SOURCE = isp-imx-$(ISP_IMX_VERSION).bin
 ISP_IMX_DEPENDENCIES = linux linux-imx-headers python3 libdrm tinyxml2 boost
@@ -38,7 +38,7 @@ endif
 ISP_IMX_CONF_ENV += SDKTARGETSYSROOT=$(STAGING_DIR)
 
 define ISP_IMX_EXTRACT_CMDS
-	$(call FREESCALE_IMX_EXTRACT_HELPER,$(ISP_IMX_DL_DIR)/$(ISP_IMX_SOURCE))
+	$(call NXP_EXTRACT_HELPER,$(ISP_IMX_DL_DIR)/$(ISP_IMX_SOURCE))
 endef
 
 define ISP_IMX_INSTALL_TARGET_CMDS
