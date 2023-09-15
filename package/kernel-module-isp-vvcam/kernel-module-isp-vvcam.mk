@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-KERNEL_MODULE_ISP_VVCAM_VERSION = 58fcf56f7232055cfa9bc44f524e85bc12c53ce5
+KERNEL_MODULE_ISP_VVCAM_VERSION = e82559d4129848fede0d9181e238314e99ae989d
 KERNEL_MODULE_ISP_VVCAM_SITE = $(call github,boundarydevices,isp-vvcam,$(KERNEL_MODULE_ISP_VVCAM_VERSION))
 KERNEL_MODULE_ISP_VVCAM_LICENSE = GPL-2.0
 KERNEL_MODULE_ISP_VVCAM_DEPENDENCIES = linux
