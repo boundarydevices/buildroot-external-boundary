@@ -1,0 +1,223 @@
+From e86c300290757529991779e3d4bf0c949910b0b4 Mon Sep 17 00:00:00 2001
+From: Lyon Wang <lyon.wang@nxp.com>
+Date: Mon, 2 Apr 2018 16:20:01 +0800
+Subject: [PATCH 1/1] MMFMWK-7895 [MX8MQ] Enable Hantro video tiled and
+
+ Move physical meta to plugin bad.
+ move to base since 1.14
+
+ Signed-off-by: Song Bing <bing.song@nxp.com>
+
+Conflicts:
+	gst-libs/gst/allocators/meson.build
+(cherry picked from commit 95a023a28a653dbf024fe024c2bf2e91ea236e52)
+---
+ gst-libs/gst/allocators/gstphymemmeta.c | 100 ++++++++++++++++++++++++
+ gst-libs/gst/allocators/gstphymemmeta.h |  57 ++++++++++++++
+ gst-libs/gst/allocators/meson.build     |   5 +-
+ 3 files changed, 160 insertions(+), 2 deletions(-)
+ create mode 100644 gst-libs/gst/allocators/gstphymemmeta.c
+ create mode 100644 gst-libs/gst/allocators/gstphymemmeta.h
+
+diff --git a/gst-libs/gst/allocators/gstphymemmeta.c b/gst-libs/gst/allocators/gstphymemmeta.c
+new file mode 100644
+index 000000000..a22ec9a57
+--- /dev/null
++++ b/gst-libs/gst/allocators/gstphymemmeta.c
+@@ -0,0 +1,100 @@
++/*
++ * Copyright (c) 2014, Freescale Semiconductor, Inc. All rights reserved.
++ *
++ * This library is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Library General Public
++ * License as published by the Free Software Foundation; either
++ * version 2 of the License, or (at your option) any later version.
++ *
++ * This library is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * Library General Public License for more details.
++ *
++ * You should have received a copy of the GNU Library General Public
++ * License along with this library; if not, write to the
++ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
++ * Boston, MA 02111-1307, USA.
++ */
++
++#include "gstphymemmeta.h"
++
++GST_DEBUG_CATEGORY_STATIC (phy_mem_meta_debug);
++#define GST_CAT_DEFAULT phy_mem_meta_debug
++
++static gboolean
++gst_phy_mem_meta_transform (GstBuffer * dest, GstMeta * meta,
++    GstBuffer * buffer, GQuark type, gpointer data)
++{
++  GstPhyMemMeta *dmeta, *smeta;
++
++  if (GST_META_TRANSFORM_IS_COPY (type)) {
++    smeta = (GstPhyMemMeta *) meta;
++    dmeta = GST_PHY_MEM_META_ADD (dest);
++
++    GST_DEBUG ("copy phy metadata");
++
++    dmeta->x_padding = smeta->x_padding;
++    dmeta->y_padding = smeta->y_padding;
++  } else if (GST_VIDEO_META_TRANSFORM_IS_SCALE (type)) {
++    GstVideoMetaTransform *trans = data;
++    gint ow, oh, nw, nh;
++
++    smeta = (GstPhyMemMeta *) meta;
++    dmeta = GST_PHY_MEM_META_ADD (dest);
++
++    ow = GST_VIDEO_INFO_WIDTH (trans->in_info);
++    nw = GST_VIDEO_INFO_WIDTH (trans->out_info);
++    oh = GST_VIDEO_INFO_HEIGHT (trans->in_info);
++    nh = GST_VIDEO_INFO_HEIGHT (trans->out_info);
++
++    GST_DEBUG ("scaling phy metadata %dx%d -> %dx%d", ow, oh, nw, nh);
++
++    dmeta->x_padding = (smeta->x_padding * nw) / ow;
++    dmeta->y_padding = (smeta->y_padding * nh) / oh;
++  }
++
++  dmeta->rfc_luma_offset = smeta->rfc_luma_offset;
++  dmeta->rfc_chroma_offset = smeta->rfc_chroma_offset;
++
++  return TRUE;
++}
++
++GType
++gst_phy_mem_meta_api_get_type (void)
++{
++  static volatile GType type = 0;
++  static const gchar *tags[] =
++      { GST_META_TAG_VIDEO_STR, GST_META_TAG_VIDEO_SIZE_STR,
++    GST_META_TAG_VIDEO_ORIENTATION_STR, NULL
++  };
++
++  if (g_once_init_enter (&type)) {
++    GType _type = gst_meta_api_type_register ("GstPhyMemMetaAPI", tags);
++    g_once_init_leave (&type, _type);
++  }
++  return type;
++}
++
++static gboolean
++gst_phy_mem_meta_init (GstMeta * meta, gpointer params, GstBuffer * buf)
++{
++  return TRUE;
++}
++
++const GstMetaInfo *
++gst_phy_mem_meta_get_info (void)
++{
++  static const GstMetaInfo *phy_mem_meta_info = NULL;
++
++  if (g_once_init_enter (&phy_mem_meta_info)) {
++    const GstMetaInfo *meta =
++        gst_meta_register (GST_PHY_MEM_META_API_TYPE, "GstPhyMemMeta",
++        sizeof (GstPhyMemMeta), (GstMetaInitFunction) gst_phy_mem_meta_init,
++        (GstMetaFreeFunction) NULL, gst_phy_mem_meta_transform);
++    GST_DEBUG_CATEGORY_INIT (phy_mem_meta_debug, "phymemmeta", 0,
++        "Freescale physical memory meta");
++    g_once_init_leave (&phy_mem_meta_info, meta);
++  }
++  return phy_mem_meta_info;
++}
+diff --git a/gst-libs/gst/allocators/gstphymemmeta.h b/gst-libs/gst/allocators/gstphymemmeta.h
+new file mode 100644
+index 000000000..cb7539097
+--- /dev/null
++++ b/gst-libs/gst/allocators/gstphymemmeta.h
+@@ -0,0 +1,57 @@
++/*
++ * Copyright (c) 2014, Freescale Semiconductor, Inc. All rights reserved.
++ *
++ * This library is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Library General Public
++ * License as published by the Free Software Foundation; either
++ * version 2 of the License, or (at your option) any later version.
++ *
++ * This library is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * Library General Public License for more details.
++ *
++ * You should have received a copy of the GNU Library General Public
++ * License along with this library; if not, write to the
++ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
++ * Boston, MA 02111-1307, USA.
++ */
++
++#ifndef __GST_PHY_MEM_META_H__ 
++#define __GST_PHY_MEM_META_H__
++
++#include <gst/gst.h>
++#include <gst/video/video.h>
++#include <gst/video/gstvideometa.h>
++#include "gstphymemmeta.h"
++
++G_BEGIN_DECLS
++
++typedef struct _GstPhyMemMeta GstPhyMemMeta;
++
++#define GST_PHY_MEM_META_API_TYPE  (gst_phy_mem_meta_api_get_type())
++#define GST_PHY_MEM_META_INFO  (gst_phy_mem_meta_get_info())
++
++#define GST_PHY_MEM_META_GET(buffer)      ((GstPhyMemMeta *)gst_buffer_get_meta((buffer), gst_phy_mem_meta_api_get_type()))
++#define GST_PHY_MEM_META_ADD(buffer)      ((GstPhyMemMeta *)gst_buffer_add_meta((buffer), gst_phy_mem_meta_get_info(), NULL))
++#define GST_PHY_MEM_META_DEL(buffer)      (gst_buffer_remove_meta((buffer), gst_buffer_get_meta((buffer), gst_phy_mem_meta_api_get_type())))
++
++struct _GstPhyMemMeta
++{
++  GstMeta meta;
++  guint x_padding;
++  guint y_padding;
++  guint rfc_luma_offset;
++  guint rfc_chroma_offset;
++};
++
++GST_EXPORT
++GType gst_phy_mem_meta_api_get_type(void);
++
++GST_EXPORT
++GstMetaInfo const * gst_phy_mem_meta_get_info(void);
++
++G_END_DECLS
++
++#endif
++
+diff --git a/gst-libs/gst/allocators/meson.build b/gst-libs/gst/allocators/meson.build
+index f8a7d9664..4e45e28ec 100644
+--- a/gst-libs/gst/allocators/meson.build
++++ b/gst-libs/gst/allocators/meson.build
+@@ -5,6 +5,7 @@ gst_allocators_headers = files([
+   'gstphysmemory.h',
+   'gstdmabuf.h',
+   'gstdmabufmeta.h',
++  'gstphymemmeta.h',
+ ])
+ 
+ gst_ionallocator_headers = []
+@@ -21,7 +22,7 @@ endif
+ 
+ install_headers(gst_allocators_headers, subdir : 'gstreamer-1.0/gst/allocators/')
+ 
+-gst_allocators_sources = files([ 'gstdmabuf.c', 'gstfdmemory.c', 'gstphysmemory.c', 'gstdmabufmeta.c'])
++gst_allocators_sources = files([ 'gstdmabuf.c', 'gstfdmemory.c', 'gstphysmemory.c', 'gstdmabufmeta.c', 'gstphymemmeta.c'])
+ 
+ gstallocators = library('gstallocators-@0@'.format(api_version),
+   gst_allocators_sources, gst_ionallocator_sources,
+@@ -31,7 +32,7 @@ gstallocators = library('gstallocators-@0@'.format(api_version),
+   soversion : soversion,
+   darwin_versions : osxversion,
+   install : true,
+-  dependencies : [gst_dep],
++  dependencies : [gst_dep, video_dep],
+ )
+ 
+ pkg_name = 'gstreamer-allocators-1.0'
+-- 
+2.34.1
+
