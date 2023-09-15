@@ -7,7 +7,7 @@ case "$1" in
 			mkdir --parents $XDG_RUNTIME_DIR
 			chmod 0700 $XDG_RUNTIME_DIR
 		fi
-		weston --log=${XDG_RUNTIME_DIR}/weston.log --debug --tty=1 &
+		weston --log=${XDG_RUNTIME_DIR}/weston.log --debug &
 		;;
 	stop)
 		killall weston
