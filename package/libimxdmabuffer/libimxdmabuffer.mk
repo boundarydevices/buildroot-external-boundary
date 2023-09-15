@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-LIBIMXDMABUFFER_VERSION = 1.1.2
+LIBIMXDMABUFFER_VERSION = 1.1.3
 LIBIMXDMABUFFER_SITE = $(call github,Freescale,libimxdmabuffer,$(LIBIMXDMABUFFER_VERSION))
 LIBIMXDMABUFFER_LICENSE = LGPL-2.1+
 LIBIMXDMABUFFER_LICENSE_FILES = LICENSE
