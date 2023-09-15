@@ -5,9 +5,9 @@
 ################################################################################
 
 ifeq ($(BR2_PACKAGE_QCA_FIRMWARE_QCA6174_PCIE),y)
-QCA_FIRMWARE_VERSION = 8376bcd5e28a954b6cb522b079d3a94ddf22a756
+QCA_FIRMWARE_VERSION = 4b93829892f354cfeb49dc9d2db74e8c13e85d6f
 else
-QCA_FIRMWARE_VERSION = af26e1e5670bb9afa0691d260924adf86c37fea3
+QCA_FIRMWARE_VERSION = bad01caf78e922ca2c4b417f8e81a42287b429b4
 endif
 QCA_FIRMWARE_SITE = \
        $(call github,boundarydevices,qca-firmware,$(QCA_FIRMWARE_VERSION))
