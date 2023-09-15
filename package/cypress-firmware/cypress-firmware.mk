@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-CYPRESS_FIRMWARE_VERSION = 449919baa69f5ca60f9234f275bb5e329ccedeaf
+CYPRESS_FIRMWARE_VERSION = e8d385cd0ce002f49be9b73cd6684e84ae15d603
 CYPRESS_FIRMWARE_SITE = \
        $(call github,boundarydevices,cypress-firmware,$(CYPRESS_FIRMWARE_VERSION))
 CYPRESS_FIRMWARE_LICENSE = Proprietary
