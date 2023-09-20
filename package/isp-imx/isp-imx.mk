@@ -47,6 +47,7 @@ define ISP_IMX_INSTALL_TARGET_CMDS
 	cp -r $(@D)/$(ISP_IMX_SUBDIR)/generated/release/bin/*.xml $(TARGET_DIR)/usr/share/imx8-isp/bin
 	cp -r $(@D)/$(ISP_IMX_SUBDIR)/generated/release/bin/isp_media_server $(TARGET_DIR)/usr/share/imx8-isp/bin
 	cp -r $(@D)/$(ISP_IMX_SUBDIR)/generated/release/bin/vvext $(TARGET_DIR)/usr/share/imx8-isp/bin
+	cp -r $(@D)/$(ISP_IMX_SUBDIR)/generated/release/bin/*.drv $(TARGET_DIR)/usr/share/imx8-isp/bin
 	cp -r $(@D)/$(ISP_IMX_SUBDIR)/generated/release/bin/*.drv $(TARGET_DIR)/usr/lib64
 	cp -r $(@D)/$(ISP_IMX_SUBDIR)/generated/release/lib/*.so* $(TARGET_DIR)/usr/lib/
 	cp -r $(@D)/dewarp/dewarp_config $(TARGET_DIR)/usr/share/imx8-isp/bin
