@@ -1,0 +1,19 @@
+#! /bin/sh
+case "$1" in
+	start|"")
+		/usr/sbin/alsactl restore
+		;;
+	stop)
+		/usr/sbin/alsactl store
+		;;
+	restart|reload)
+		$0 stop
+		sleep 1
+		$0 start
+		;;
+	*)
+		echo "Usage: $0 {start|stop}" >&2
+		exit 1
+		;;
+esac
+#
